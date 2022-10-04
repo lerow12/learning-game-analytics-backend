@@ -48,7 +48,6 @@ class GameStartStruct(object):
         self.BoardSize = BoardSize
         self.numberRange = numberRange
 
-
 class DeckRefreshStruct(object):
     def _init_self(self, Description: str):
         self.Description = Description
