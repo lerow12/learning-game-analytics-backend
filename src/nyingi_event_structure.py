@@ -61,7 +61,6 @@ class PlyaerInputStruct(object):
         self.Value = Value
         
 
-
 class BoardInitStruct(object):
     def _init_self(self, Description: str,BoardTiles: List[BoardTiles]):
         self.Description = Description
