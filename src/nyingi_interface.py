@@ -59,6 +59,7 @@ class PlyaerInputStruct(object):
         self.Description = Description
         self.Type = Type
         self.Value = Value
+        
 
 
 class BoardInitStruct(object):
