@@ -1,11 +1,13 @@
 """Defines game event objects"""
 import json
 
+
 class EventContainer(object):
     def _init_self(self, EVENTID: int, Timestamp: str,  jsonString: str):
         self.EVENTID = EVENTID
         self.Timestamp = Timestamp
         self.jsonString = jsonString
+
 
 class MetadataStruct(object):
     def _init_self(self, Description: str, GameName: str):
@@ -59,9 +61,9 @@ class PlyaerInputStruct(object):
         self.Description = Description
         self.Type = Type
         self.Value = Value
-        
+
 
 class BoardInitStruct(object):
-    def _init_self(self, Description: str,BoardTiles: List[BoardTiles]):
+    def _init_self(self, Description: str, BoardTiles: List[BoardTiles]):
         self.Description = Description
         self.BoardTiles = BoardTiles
