@@ -1,4 +1,5 @@
 """Defines game event objects"""
+from typing import List
 import json
 
 
