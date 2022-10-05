@@ -23,7 +23,8 @@ class PlayerSwapStruct(object):
 
 
 class PlayerMoveStruct(object):
-    def __init__(self, Description: str, PlayerNum: int, CardsPlayed: List, Successful: bool, SquareId: List):
+    def __init__(self, Description: str, PlayerNum: int, CardsPlayed: List,
+                 Successful: bool, SquareId: List):
         self.description = Description
         self.player_num = PlayerNum
         self.cards_played = CardsPlayed
@@ -44,7 +45,8 @@ class GameOverStruct(object):
 
 
 class GameStartStruct(object):
-    def __init__(self, Description: str, difficulty: str, BoardSize: List, numberRange: List):
+    def __init__(self, Description: str, difficulty: str, BoardSize: List,
+                 numberRange: List):
         self.description = Description
         self.difficulty = difficulty
         self.board_size = BoardSize
