@@ -1,70 +1,69 @@
 """Defines game event objects"""
 from typing import List
-import json
 
 
 class EventContainer(object):
-    def _init_self(self, EVENTID: int, Timestamp: str,  jsonString: str):
-        self.EVENTID = EVENTID
-        self.Timestamp = Timestamp
-        self.jsonString = jsonString
+    def __init__(self, EVENTID: int, Timestamp: str,  jsonString: str):
+        self.event_id = EVENTID
+        self.timestamp = Timestamp
+        self.json_string = jsonString
 
 
 class MetadataStruct(object):
-    def _init_self(self, Description: str, GameName: str):
-        self.Description = Description
-        self.GameName = GameName
+    def __init__(self, Description: str, GameName: str):
+        self.description = Description
+        self.game_name = GameName
 
 
 class PlayerSwapStruct(object):
-    def _init_self(self, Description: str, PlayerNum: int, SwappedCards: List):
-        self.Description = Description
-        self.PlayerNum = PlayerNum
-        self.SwappedCards = SwappedCards
+    def __init__(self, Description: str, PlayerNum: int, SwappedCards: List):
+        self.description = Description
+        self.player_num = PlayerNum
+        self.swapped_cards = SwappedCards
 
 
 class PlayerMoveStruct(object):
-    def _init_self(self, Description: str, PlayerNum: int, CardsPlayed: List, Successful: bool, SquareId: List):
-        self.Description = Description
-        self.PlayerNum = PlayerNum
-        self.CardsPlayed = CardsPlayed
-        self.Successful = Successful
-        self.SquareId = SquareId
+    def __init__(self, Description: str, PlayerNum: int, CardsPlayed: List, Successful: bool, SquareId: List):
+        self.description = Description
+        self.player_num = PlayerNum
+        self.cards_played = CardsPlayed
+        self.is_successful = Successful
+        self.square_id = SquareId
 
 
 class CardDrawnStruct(object):
-    def _init_self(self, Description: str, CardValue: str):
-        self.Description = Description
-        self.CardValue = CardValue
+    def __init__(self, Description: str, CardValue: str):
+        self.description = Description
+        self.card_value = CardValue
 
 
 class GameOverStruct(object):
-    def _init_self(self, Description: str, WinnerNum: int):
-        self.Description = Description
-        self.WinnerNum = WinnerNum
+    def __init__(self, Description: str, WinnerNum: int):
+        self.description = Description
+        self.winner_num = WinnerNum
 
 
 class GameStartStruct(object):
-    def _init_self(self, Description: str, difficulty: str, BoardSize: List, numberRange: List):
-        self.Description = Description
+    def __init__(self, Description: str, difficulty: str, BoardSize: List, numberRange: List):
+        self.description = Description
         self.difficulty = difficulty
-        self.BoardSize = BoardSize
-        self.numberRange = numberRange
+        self.board_size = BoardSize
+        self.number_range = numberRange
 
 
 class DeckRefreshStruct(object):
-    def _init_self(self, Description: str):
-        self.Description = Description
+    def __init__(self, Description: str):
+        self.description = Description
 
 
 class PlyaerInputStruct(object):
-    def _init_self(self, Description: str, Type: str, Value: str):
-        self.Description = Description
-        self.Type = Type
-        self.Value = Value
+    def __init__(self, Description: str, Type: str, Value: str):
+        self.description = Description
+        self.type = Type
+        self.value = Value
 
 
 class BoardInitStruct(object):
-    def _init_self(self, Description: str, BoardTiles: List):
-        self.Description = Description
-        self.BoardTiles = BoardTiles
+    def __init__(self, Description: str, BoardTiles: List):
+        self.description = Description
+        self.board_tiles = BoardTiles
