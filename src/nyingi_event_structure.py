@@ -17,14 +17,14 @@ class MetadataStruct(object):
 
 
 class PlayerSwapStruct(object):
-    def _init_self(self, Description: str, PlayerNum: int, SwappedCards: List[SwappedCards]):
+    def _init_self(self, Description: str, PlayerNum: int, SwappedCards: List):
         self.Description = Description
         self.PlayerNum = PlayerNum
         self.SwappedCards = SwappedCards
 
 
 class PlayerMoveStruct(object):
-    def _init_self(self, Description: str, PlayerNum: int, CardsPlayed: List[CardsPlayed], Successful: bool, SquareId: List[SquareId]):
+    def _init_self(self, Description: str, PlayerNum: int, CardsPlayed: List, Successful: bool, SquareId: List):
         self.Description = Description
         self.PlayerNum = PlayerNum
         self.CardsPlayed = CardsPlayed
@@ -45,7 +45,7 @@ class GameOverStruct(object):
 
 
 class GameStartStruct(object):
-    def _init_self(self, Description: str, difficulty: str, BoardSize: List[BoardSize], numberRange: List[numberRange]):
+    def _init_self(self, Description: str, difficulty: str, BoardSize: List, numberRange: List):
         self.Description = Description
         self.difficulty = difficulty
         self.BoardSize = BoardSize
@@ -65,6 +65,6 @@ class PlyaerInputStruct(object):
 
 
 class BoardInitStruct(object):
-    def _init_self(self, Description: str, BoardTiles: List[BoardTiles]):
+    def _init_self(self, Description: str, BoardTiles: List):
         self.Description = Description
         self.BoardTiles = BoardTiles
