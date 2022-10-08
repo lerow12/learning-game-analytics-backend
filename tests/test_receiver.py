@@ -1,6 +1,7 @@
 import hug
 import src.receiver as receiver
 
+
 def test_upload_file():
     TEST_EVENT = b'{"EVENTID": -1, "Timestamp": "", "jsonString": ""}'
     response = hug.test.post(receiver, "/upload", TEST_EVENT)
