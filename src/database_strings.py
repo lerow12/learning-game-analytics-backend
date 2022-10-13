@@ -10,8 +10,8 @@ FOREIGN KEY (game_id) REFERENCES GameTable(game_id));"
 
 Create_CardDif = "CREATE TABLE CardDiff\
 (card_diff_id INT AUTO_INCREMENT PRIMARY KEY, \
-hand VARBINARY(7), cards_lost VARBINARY(7), \
-cards_gained VARBINARY(7), player_num INT);"
+hand VARCHAR(7), cards_lost VARCHAR(7), \
+cards_gained VARCHAR(7), player_num INT);"
 
 Create_BoardDif = "CREATE TABLE BoardDiff\
 (board_diff_id INT AUTO_INCREMENT PRIMARY KEY, \
