@@ -1,5 +1,5 @@
 import mysql.connector
-import database_strings as dbs
+from src import database_strings as dbs 
 """Repackages events and stores them in mysql database"""
 # Temporary Credentials. Replace with your own to test.
 database_name = "NyingiDatabase"
@@ -13,7 +13,7 @@ nyingi_query_list = [
         dbs.Create_Player_Events]
 
 
-def deleteDatabase(host, user, password, database_name):
+def delete_database(host, user, password, database_name):
     init_database = mysql.connector.connect(
         host=host,
         user=user,
@@ -24,7 +24,7 @@ def deleteDatabase(host, user, password, database_name):
     init_db_cursor.close()
 
 
-def createDatabase(host, user, password, database_name, query_list):
+def create_database(host, user, password, database_name, query_list):
     init_database = mysql.connector.connect(
         host=host,
         user=user,
@@ -32,10 +32,10 @@ def createDatabase(host, user, password, database_name, query_list):
     init_db_cursor = init_database.cursor()
     init_db_cursor.execute("CREATE DATABASE {};".format(database_name))
     init_db_cursor.close()
-    createTables(host, user, password, database_name, query_list)
+    create_tables(host, user, password, database_name, query_list)
 
 
-def createTables(host, user, password, database_name, query_list):
+def create_tables(host, user, password, database_name, query_list):
     init_database = mysql.connector.connect(
         host=host,
         user=user,
