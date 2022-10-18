@@ -25,5 +25,5 @@ Create_GameTable = "CREATE TABLE GameTable\
 (game_id INT AUTO_INCREMENT PRIMARY KEY, \
 board_area INT, max_value INT, computer_difficulty VARCHAR(10), \
 game_name VARCHAR(32), board_state VARBINARY(256), winner INT, \
-computer_hand VARBINARY(7), \
-player_hand VARBINARY(7));"
+computer_hand VARCHAR(7), \
+player_hand VARCHAR(7));"
