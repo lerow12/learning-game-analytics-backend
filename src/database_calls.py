@@ -1,5 +1,6 @@
 import mysql.connector
 
+database_name = "NyingiDatabase"
 host = "localhost"
 user = "test"
 password = "password"
@@ -16,7 +17,8 @@ def save_game_table(board_area, max_value, computer_difficulty, game_name, board
     con = mysql.connector.connect(
         host=host,
         user=user,
-        password=password
+        password=password,
+        database=database_name
     )
     cur = con.cursor()
     board_state = list_to_varbinary(board_state)
@@ -33,7 +35,8 @@ def save_board_diff(x, y, val, taken_matrix, player_num):
     con = mysql.connector.connect(
         host=host,
         user=user,
-        password=password
+        password=password,
+        database=database_name
     )
     cur = con.cursor()
     taken_matrix = list_to_varbinary(taken_matrix)
@@ -48,7 +51,8 @@ def save_card_diff(hand, cards_used, cards_gained, player_num):
     con = mysql.connector.connect(
         host=host,
         user=user,
-        password=password
+        password=password,
+        database=database_name
     )
     cur = con.cursor()
     hand = ''.join(hand)
@@ -65,7 +69,8 @@ def save_player_events(player_num, player_id, is_swap, is_successful, timestamp,
     con = mysql.connector.connect(
         host=host,
         user=user,
-        password=password
+        password=password,
+        database=database_name
     )
     cur = con.cursor()
     cur.execute(f"""
