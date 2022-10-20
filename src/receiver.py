@@ -15,10 +15,11 @@ def upload_file(body: hug.types.text):
 
     for event in unquote(body).strip().split(sep="\n"):
         new_event = EventContainer(**jsonLoad(event))
-        events.append(new_event)
         if new_event.event_id == 0:
             game_data = MetadataStruct(**jsonLoad(new_event.json_string))
             game_name = game_data.game_name
+        else:
+            events.append(new_event)
 
     match game_name:
         case "Nyingi":
