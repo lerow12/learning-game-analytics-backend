@@ -3,6 +3,7 @@ the correct interface"""
 
 import hug
 from src.nyingi_event_structure import EventContainer, MetadataStruct
+from src.nyingi_interface import unpack_nyingi_events
 from json import loads as jsonLoad
 from urllib.parse import unquote
 
@@ -21,9 +22,7 @@ def upload_file(body: hug.types.text):
 
     match game_name:
         case "Nyingi":
-            # Call Nyingi_interface.py
-            for event in events:
-                print(event.json_string)
+            unpack_nyingi_events(events)
             return
         case None:
             return body
