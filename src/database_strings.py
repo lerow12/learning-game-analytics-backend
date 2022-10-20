@@ -18,7 +18,7 @@ cards_gained VARCHAR(7), player_num INT);"
 # taken_matrix is taken state before play.
 Create_BoardDif = "CREATE TABLE BoardDiff\
 (board_diff_id INT AUTO_INCREMENT PRIMARY KEY, \
-x INT, y INT, val INT, \
+x INT, y INT, \
 taken_matrix VARBINARY(256), player_num INT);"
 
 Create_GameTable = "CREATE TABLE GameTable\

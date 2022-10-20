@@ -24,12 +24,12 @@ class PlayerSwapStruct(object):
 
 class PlayerMoveStruct(object):
     def __init__(self, Description: str, PlayerNum: int, CardsPlayed: List,
-                 Successful: bool, SquareId: List):
+                 Successful: bool, SquareID: List):
         self.description = Description
         self.player_num = PlayerNum
         self.cards_played = CardsPlayed
         self.is_successful = Successful
-        self.square_id = SquareId
+        self.square_id = SquareID
 
 
 class CardDrawnStruct(object):

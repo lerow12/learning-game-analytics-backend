@@ -1,5 +1,5 @@
 import mysql.connector
-from src import database_strings as dbs 
+import database_strings as dbs 
 """Repackages events and stores them in mysql database"""
 # Temporary Credentials. Replace with your own to test.
 database_name = "NyingiDatabase"
@@ -44,3 +44,5 @@ def create_tables(host, user, password, database_name, query_list):
     init_db_cursor = init_database.cursor()
     for query in query_list:
         init_db_cursor.execute(query)
+
+create_database(host, user, password, database_name, nyingi_query_list)
