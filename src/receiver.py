@@ -18,6 +18,7 @@ def upload_file(body: hug.types.text):
         if new_event.event_id == 0:
             game_data = MetadataStruct(**jsonLoad(new_event.json_string))
             game_name = game_data.game_name
+            events.append(new_event)
         else:
             events.append(new_event)
 
