@@ -38,20 +38,33 @@ def unpack_nyingi_events(events):
 
 def rebuild_game(objects):
     global event_types
+    game_start_db = []
     board = []
-    hand = []
+    player_hand = []
+    computer_hand = []
 
     for event_id, timestamp, object in objects:
         if event_id == event_types["game_start"]:
-            pass
+            game_start_db.append(object.board_size[0] * object.board_size[1])
+            game_start_db.append(object.number_range[0] * object.number_range[1])
+            game_start_db.append(object.difficulty)
+            game_start_db.append("Nyingi")
         elif event_id == event_types["card_draw"]:
-            print(object.card_value)
+            if "1" in object.description:
+                player_hand.append(object.card_value)
+            else:
+                computer_hand.append(object.card_value)
         elif event_id == event_types["board_init"]:
-            pass
+            game_start_db.append(object.board_tiles)
         elif event_id == event_types["player_input"]:
             pass
         elif event_id == event_types["player_swap"]:
-            pass
+            if object.player_num == 1:
+                for card in object.swapped_cards:
+                    player_hand.remove(card)
+            else:
+                for card in object.swapped_cards:
+                    computer_hand.remove(card)
         elif event_id == event_types["player_move"]:
             pass
         elif event_id == event_types["game_over"]:
