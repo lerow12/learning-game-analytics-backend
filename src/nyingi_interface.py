@@ -209,7 +209,7 @@ def extract_player_events(event_queue, game_ids):
     current_board_state = []
     game_id = 0
     board_size = 0
-
+    requeue = []
     while (event_queue):
         cur_event = event_queue.pop(0)
         event_type = cur_event[0]
@@ -222,7 +222,7 @@ def extract_player_events(event_queue, game_ids):
             current_board_state = [0]*board_size
             game_id = game_ids.pop(0)
         elif (event_type == 3 and event_object[2].player_num == 2):
-            pass
+            requeue.append(cur_event)
         elif (event_type == 7):
             active_event.game_id = game_id
             active_event.is_swap = 0
@@ -239,13 +239,20 @@ def extract_player_events(event_queue, game_ids):
                 board_diff_id = dc.save_board_diff(
                     diff.x, diff.y, diff.taken_matrix, diff.player_num)
                 active_event.board_diff_id = board_diff_id
+                if (event_object.player_num == 1):
+                    hand = player_hand
+                else:
+                    hand = computer_hand
+                    for event in requeue:
+                        event_queue.insert(0, event)
+                    requeue = []
                 cards_drawn = []
-                previous_hand = player_hand
+                previous_hand = hand.copy()
                 for card in event_object.cards_played:
                     card_event = event_queue.pop(0)
                     cards_drawn.append(card_event[2].card_value)
-                    player_hand.append(card_event[2].card_value)
-                    player_hand.remove(card)
+                    hand.append(card_event[2].card_value)
+                    hand.remove(card)
                 card_diff_id = dc.save_card_diff(previous_hand, event_object.cards_played, cards_drawn, event_object.player_num)
                 active_event.card_diff_id = card_diff_id
             player_events.append(active_event)
@@ -264,7 +271,7 @@ def extract_player_events(event_queue, game_ids):
             last_timestamp = event_TS
             active_event.is_successful = 1
             cards_drawn = []
-            previous_hand = hand
+            previous_hand = hand.copy()
             for card in event_object.swapped_cards:
                 card_event = event_queue.pop(0)
                 cards_drawn.append(card_event[2].card_value)
