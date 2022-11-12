@@ -57,7 +57,7 @@ event_classes = {
     2: ne.GameStartStruct,
     3: ne.CardDrawnStruct,
     4: ne.BoardInitStruct,
-    5: ne.PlyaerInputStruct,
+    5: ne.PlayerInputStruct,
     6: ne.PlayerSwapStruct,
     7: ne.PlayerMoveStruct,
     8: ne.GameOverStruct,
@@ -193,8 +193,8 @@ def extract_player_events(event_queue, game_ids):
     active_event = SQLPlayerEvent()
     in_event = False
     last_timestamp = ""
-    last_player_hand = []
-    last_computer_hand = []
+    player_hand = []
+    computer_hand = []
     current_board_state = []
     board_vals = []
     game_id = 0
@@ -227,6 +227,8 @@ def extract_player_events(event_queue, game_ids):
                 board_diff_id = dc.save_board_diff(
                     diff.x, diff.y, diff.taken_matrix, diff.player_num)
                 active_event.board_diff_id = board_diff_id
+                
+
             player_events.append(active_event)
             active_event = SQLPlayerEvent()
         if (event_type == 6):
@@ -245,12 +247,38 @@ def extract_player_events(event_queue, game_ids):
 
 def extract_card_dif(diff_queue):
     cardDiffs = []
-    current_hand = []
-    in_event = False
+    current_player_hand = []
+    current_computer_hand = []
+    player_cards_added = []
+    player_cards_played = []
+    computer_cards_added = []
+    computer_cards_played = []
+    event_player = 0
+    activeDiff = SQLCardDiff()
     while (diff_queue):
         cur_event = diff_queue.pop()
         event_type = cur_event[0]
+        event_object = cur_event[2]
         if (event_type == 3):
+            if (event_object.description.contains('1')):
+                current_player_hand.append(event_object.card_value)
+                player_cards_added.append(event_object.card_value)
+            if (event_object.description.contains('2')):
+                current_computer_hand.append(event_object.card_value)
+                computer_cards_added.append(event_object.cards_value)
+        if (event_type == 6 and event_object.is_successful == True):
+            if (event_object.player_num == 1):
+                for card in event_object.cards_played:
+                    current_player_hand.remove(card)
+                    player_cards_played.append(card)
+            if (event_object.player_num == 2):
+                for card in event_object.cards_played:
+                    current_computer_hand.remove(card)
+                    player_cards_played.append(card)
+
+
+        if (event_type == 7):
+
 
 
 
