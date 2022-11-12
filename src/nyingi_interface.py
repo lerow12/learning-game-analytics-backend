@@ -44,14 +44,6 @@ class SQLBoardDiff():
         self.player_num = 0
 
 
-class SQLCardDiff():
-    def __init__(self):
-        self.hand = []
-        self.cards_gained = []
-        self.cards_lost = []
-        self.player_num = 0
-
-
 event_classes = {
     0: ne.MetadataStruct,
     2: ne.GameStartStruct,
@@ -107,15 +99,6 @@ def generate_board_dif(play, last_board_state, board_size):
     diff.taken_matrix = last_board_state.copy()
     offset = diff.y*isqrt(board_size)+diff.x
     diff.taken_matrix[offset] = 1
-    return diff
-
-
-def generate_card_dif(gained, lost, hand, num):
-    diff = SQLCardDiff()
-    diff.cards_gained = gained
-    diff.cards_lost = lost
-    diff.hand = hand
-    diff.player_num = num
     return diff
 
 
