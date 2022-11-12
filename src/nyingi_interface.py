@@ -1,7 +1,6 @@
 """Unpacks game events into objects"""
 
 from math import isqrt
-from threading import activeCount
 import src.nyingi_event_structure as ne
 import src.database_calls as dc
 from json import loads as jsonLoad
@@ -75,6 +74,16 @@ event_types = {
     "game_over": 8,
     "deck_refresh": 9
 }
+
+
+def value_convert(value):
+    if (value == "Prime"):
+        return 'P'
+    elif (value == "Wild"):
+        return 'W'
+    else:
+        return value
+
 
 def get_timestamp_difference(early, late):
     fmt = '%m/%d/%Y %I:%M:%S %p'
@@ -167,11 +176,7 @@ def extract_games(event_queue):
             for x in range(7):
                 player_draw_event = event_queue.pop(0)
                 if (player_draw_event[0] == 3):
-                    card_value = player_draw_event[2].card_value
-                    if (card_value == "Prime"):
-                        card_value = 'P'
-                    elif (card_value == "Wild"):
-                        card_value = 'W'
+                    card_value = value_convert(player_draw_event[2].card_value)
                     current_game.player_hand.append(card_value)
                 else:
                     # If we don't even draw all the cards
@@ -179,11 +184,7 @@ def extract_games(event_queue):
                     current_game = SQLGameStart()
                 computer_draw_event = event_queue.pop(0)
                 if (computer_draw_event[0] == 3):
-                    card_value = player_draw_event[2].card_value
-                    if (card_value == "Prime"):
-                        card_value = 'P'
-                    elif (card_value == "Wild"):
-                        card_value = 'W'
+                    card_value = value_convert(player_draw_event[2].card_value)
                     current_game.computer_hand.append(card_value)
                 else:
                     current_game = SQLGameStart()
@@ -221,7 +222,18 @@ def extract_player_events(event_queue, game_ids):
                 event_object.board_size[1]
             current_board_state = [0]*board_size
             game_id = game_ids.pop(0)
-        elif (event_type == 3 and event_object[2].player_num == 2):
+            player_hand = []
+            computer_hand = []
+            for x in range(7):
+                player_draw_event = event_queue.pop(0)
+                if (player_draw_event[0] == 3):
+                    card_value = value_convert(player_draw_event[2].card_value)
+                    player_hand.append(card_value)
+                computer_draw_event = event_queue.pop(0)
+                if (computer_draw_event[0] == 3):
+                    card_value = value_convert(computer_draw_event[2].card_value)
+                    computer_hand.append(card_value)
+        elif (event_type == 3 and event_object.description.__contains__('2')):
             requeue.append(cur_event)
         elif (event_type == 7):
             active_event.game_id = game_id
@@ -247,13 +259,17 @@ def extract_player_events(event_queue, game_ids):
                         event_queue.insert(0, event)
                     requeue = []
                 cards_drawn = []
+                cards_played = []
                 previous_hand = hand.copy()
                 for card in event_object.cards_played:
                     card_event = event_queue.pop(0)
-                    cards_drawn.append(card_event[2].card_value)
-                    hand.append(card_event[2].card_value)
-                    hand.remove(card)
-                card_diff_id = dc.save_card_diff(previous_hand, event_object.cards_played, cards_drawn, event_object.player_num)
+                    value = value_convert(card_event[2].card_value)
+                    played = value_convert(card)
+                    cards_drawn.append(value)
+                    cards_played.append(played)
+                    hand.append(value)
+                    hand.remove(played)
+                card_diff_id = dc.save_card_diff(previous_hand, cards_played, cards_drawn, event_object.player_num)
                 active_event.card_diff_id = card_diff_id
             player_events.append(active_event)
             active_event = SQLPlayerEvent()
@@ -271,34 +287,18 @@ def extract_player_events(event_queue, game_ids):
             last_timestamp = event_TS
             active_event.is_successful = 1
             cards_drawn = []
+            cards_swapped = []
             previous_hand = hand.copy()
             for card in event_object.swapped_cards:
                 card_event = event_queue.pop(0)
-                cards_drawn.append(card_event[2].card_value)
-                hand.append(card_event[2].card_value)
-                hand.remove(card)
-            card_diff_id = dc.save_card_diff(previous_hand, event_object.swapped_cards, cards_drawn, event_object.player_num)
+                value = value_convert(card_event[2].card_value)
+                swapped = value_convert(card)
+                cards_drawn.append(value)
+                cards_swapped.append(swapped)
+                hand.append(value)
+                hand.remove(swapped)
+            card_diff_id = dc.save_card_diff(previous_hand, cards_swapped, cards_drawn, event_object.player_num)
             active_event.card_diff_id = card_diff_id
             player_events.append(active_event)
             active_event = SQLPlayerEvent()
-        elif (event_type == 2):
-            player_hand = []
-            computer_hand = []
-            for x in range(7):
-                player_draw_event = event_queue.pop(0)
-                if (player_draw_event[0] == 3):
-                    card_value = player_draw_event[2].card_value
-                    if (card_value == "Prime"):
-                        card_value = 'P'
-                    elif (card_value == "Wild"):
-                        card_value = 'W'
-                    player_hand.append(card_value)
-                computer_draw_event = event_queue.pop(0)
-                if (computer_draw_event[0] == 3):
-                    card_value = computer_draw_event[2].card_value
-                    if (card_value == "Prime"):
-                        card_value = 'P'
-                    elif (card_value == "Wild"):
-                        card_value = 'W'
-                    computer_hand.append(card_value)
     return player_events
