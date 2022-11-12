@@ -5,6 +5,7 @@ host = "localhost"
 user = "test"
 password = "password"
 
+
 #  Converts a list of ints into a hexadecimal string representation
 def list_to_varbinary(arr):
     varbinary = ["0x"]
@@ -12,6 +13,7 @@ def list_to_varbinary(arr):
         varbinary.append(hex(num)[2:].rjust(3,"0"))
     string = ''.join(varbinary)
     return string
+
 
 def save_game_table(board_area, max_value, computer_difficulty, game_name, board_state, winner, computer_hand, player_hand):
     con = mysql.connector.connect(
@@ -33,6 +35,7 @@ def save_game_table(board_area, max_value, computer_difficulty, game_name, board
     con.close()
     return game_id
 
+
 def save_board_diff(x, y, taken_matrix, player_num):
     con = mysql.connector.connect(
         host=host,
@@ -51,6 +54,7 @@ def save_board_diff(x, y, taken_matrix, player_num):
     con.close()
     return diff_id
 
+
 def save_card_diff(hand, cards_used, cards_gained, player_num):
     con = mysql.connector.connect(
         host=host,
@@ -68,6 +72,7 @@ def save_card_diff(hand, cards_used, cards_gained, player_num):
     """)
     con.commit()
     con.close()
+
 
 def save_player_events(player_num, player_id, is_swap, is_successful, timestamp, play_time, card_diff_id, board_diff_id, game_id):
     con = mysql.connector.connect(

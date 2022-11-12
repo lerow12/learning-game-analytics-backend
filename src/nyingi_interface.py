@@ -44,6 +44,14 @@ class SQLBoardDiff():
         self.player_num = 0
 
 
+class SQLCardDiff():
+    def __init__(self):
+        self.hand = []
+        self.cards_gained = []
+        self.cards_lost = []
+        self.player_num
+
+
 event_classes = {
     0: ne.MetadataStruct,
     2: ne.GameStartStruct,
@@ -67,6 +75,28 @@ event_types = {
     "deck_refresh": 9
 }
 
+def get_timestamp_difference(early, late):
+    fmt = '%m/%d/%Y %I:%M:%S %p'
+    earlystamp = datetime.strptime(early, fmt)
+    latestamp = datetime.strptime(late, fmt)
+    time_elapsed = latestamp-earlystamp
+    return time_elapsed
+
+
+def convert_to_SQL_timestamp(time):
+    fmt = '%m/%d/%Y %I:%M:%S %p'
+    raw_time = datetime.strptime(time, fmt)
+    return raw_time
+
+def generate_board_dif(play, last_board_state, board_size):
+    diff = SQLBoardDiff()
+    diff.x = play.square_id[0]
+    diff.y = play.square_id[1]
+    diff.player_num = play.player_num
+    diff.taken_matrix = last_board_state.copy()
+    offset = diff.y*isqrt(board_size)+diff.x
+    diff.taken_matrix[offset] = 1
+    return diff
 
 def unpack_nyingi_events(events):
     global event_classes
@@ -108,7 +138,6 @@ def extract_games(event_queue):
         cur_event = event_queue.pop(0)
         event_type = cur_event[0]
         event_object = cur_event[2]
-        event_TS = cur_event[1]
         if (event_type == 0):
             if (in_game):
                 games.append(current_game)
@@ -214,31 +243,19 @@ def extract_player_events(event_queue, game_ids):
     return player_events
 
 
+def extract_card_dif(diff_queue):
+    cardDiffs = []
+    current_hand = []
+    in_event = False
+    while (diff_queue):
+        cur_event = diff_queue.pop()
+        event_type = cur_event[0]
+        if (event_type == 3):
+
+
+
 def generate_card_dif():
     pass
 
 
-def generate_board_dif(play, last_board_state, board_size):
-    diff = SQLBoardDiff()
-    diff.x = play.square_id[0]
-    diff.y = play.square_id[1]
-    diff.player_num = play.player_num
-    diff.taken_matrix = last_board_state.copy()
-    offset = diff.y*isqrt(board_size)+diff.x
-    diff.taken_matrix[offset] = 1
-    return diff
-
-
-def get_timestamp_difference(early, late):
-    fmt = '%m/%d/%Y %I:%M:%S %p'
-    earlystamp = datetime.strptime(early, fmt)
-    latestamp = datetime.strptime(late, fmt)
-    time_elapsed = latestamp-earlystamp
-    return time_elapsed
-
-
-def convert_to_SQL_timestamp(time):
-    fmt = '%m/%d/%Y %I:%M:%S %p'
-    raw_time = datetime.strptime(time, fmt)
-    return raw_time
 
