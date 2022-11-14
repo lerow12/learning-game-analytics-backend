@@ -1,9 +1,8 @@
 """Unpacks game events into objects"""
 
 from math import isqrt
-import re
-import src.nyingi_event_structure as ne
-import src.database_calls as dc
+import nyingi_event_structure as ne
+import database_calls as dc
 from json import loads as jsonLoad
 from datetime import datetime
 

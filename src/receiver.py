@@ -2,8 +2,8 @@
 the correct interface"""
 
 import hug
-from src.nyingi_event_structure import EventContainer, MetadataStruct
-from src.nyingi_interface import unpack_nyingi_events
+from nyingi_event_structure import EventContainer, MetadataStruct
+from nyingi_interface import unpack_nyingi_events
 from json import loads as jsonLoad
 from urllib.parse import unquote
 
