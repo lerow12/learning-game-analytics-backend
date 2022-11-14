@@ -58,7 +58,7 @@ class DeckRefreshStruct(object):
         self.description = Description
 
 
-class PlyaerInputStruct(object):
+class PlayerInputStruct(object):
     def __init__(self, Description: str, Type: str, Value: str):
         self.description = Description
         self.type = Type

@@ -1,11 +1,11 @@
 """Unpacks game events into objects"""
 
 from math import isqrt
-import re
 import src.nyingi_event_structure as ne
 import src.database_calls as dc
 from json import loads as jsonLoad
 from datetime import datetime
+
 
 class SQLGameStart():
     def __init__(self):
@@ -17,8 +17,10 @@ class SQLGameStart():
         self.winner = 0
         self.computer_hand = []
         self.player_hand = []
+
     def __str__(self) -> str:
         return f"{vars(self)}"
+
 
 class SQLPlayerEvent():
     def __init__(self):
@@ -32,6 +34,7 @@ class SQLPlayerEvent():
         self.board_diff_id = 0
         self.game_id = 0
 
+
 class SQLBoardDiff():
     def __init__(self):
         self.x = 0
@@ -40,12 +43,13 @@ class SQLBoardDiff():
         self.taken_matrix = []
         self.player_num = 0
 
+
 event_classes = {
     0: ne.MetadataStruct,
     2: ne.GameStartStruct,
     3: ne.CardDrawnStruct,
     4: ne.BoardInitStruct,
-    5: ne.PlyaerInputStruct,
+    5: ne.PlayerInputStruct,
     6: ne.PlayerSwapStruct,
     7: ne.PlayerMoveStruct,
     8: ne.GameOverStruct,
@@ -64,165 +68,220 @@ event_types = {
 }
 
 
-def unpack_nyingi_events(events):
-    global event_classes
-    objects = []
-    for event in events:
-        class_type = event_classes[event.event_id]
-        objects.append((event.event_id, event.timestamp, class_type(**jsonLoad(event.json_string))))
-    rebuild_game(objects)
+def value_convert(value):
+    if (value == "Prime"):
+        return 'P'
+    elif (value == "Wild"):
+        return 'W'
+    else:
+        return value
 
 
-def rebuild_game(objects):
-    gameStartEvents = []
-    playerEvents = []
-    for event in objects:
-        eventType = event[0]
-        if (eventType in [0, 2, 8, 3, 4]):
-            gameStartEvents.append(event)
-        if (eventType in [7, 3, 5, 2, 6]):
-            playerEvents.append(event)
-    game_structures = extractGames(gameStartEvents)
-    game_ids = []
-    for game in game_structures:
-        game_ids.append(dc.save_game_table(game.board_area, game.max_value, game.computer_difficulty, game.game_name, game.board_state, game.winner, game.computer_hand, game.player_hand))
-    player_events = extractPlayerEvents(playerEvents, game_ids)
-    for player_event in player_events:
-        dc.save_player_events(player_event.player_num, player_event.player_id, player_event.is_swap, player_event.is_successful, player_event.timestamp, player_event.play_time, 0, player_event.board_diff_id, player_event.game_id )
-
-def extractGames(eventQueue):
-    games = []
-    # Fun fact: Lists evaluate to true in python while they are not empty!
-    # This may be the worst piece of code I've ever written.
-    currentGame = SQLGameStart() 
-    inGame = False
-    while(eventQueue):
-        curEvent = eventQueue.pop(0)
-        eventType = curEvent[0]
-        eventObject = curEvent[2]
-        eventTS = curEvent[1]
-        if (eventType == 0):
-            if (inGame):
-                games.append(currentGame)
-                currentGame = SQLGameStart() 
-                currentGame.game_name = eventObject.game_name
-            else:
-                currentGame.game_name = eventObject.game_name
-                inGame = True
-        if (eventType == 2):
-            currentGame.computer_difficulty = eventObject.difficulty 
-            currentGame.board_area = eventObject.board_size[0] * eventObject.board_size[1]
-            currentGame.max_value = eventObject.number_range[0] * eventObject.number_range[1]
-            for x in range(7):
-                playerDrawEvent = eventQueue.pop(0)
-                if (playerDrawEvent[0]==3):
-                    card_value = playerDrawEvent[2].card_value
-                    if (card_value == "Prime"):
-                        card_value = 'P'
-                    elif (card_value == "Wild"):
-                        card_value = 'W'
-                    currentGame.player_hand.append(card_value)
-                else:
-                    # If we don't even draw all the cards the data can't possibly be that useful.
-                    currentGame = SQLGameStart()
-                computerDrawEvent = eventQueue.pop(0)
-                if (computerDrawEvent[0]==3):
-                    card_value = playerDrawEvent[2].card_value
-                    if (card_value == "Prime"):
-                        card_value = 'P'
-                    elif (card_value == "Wild"):
-                        card_value = 'W'
-                    currentGame.computer_hand.append(card_value)
-                else:
-                    currentGame = SQLGameStart()
-        if(eventType == 4):
-            currentGame.board_state = eventObject.board_tiles
-        if(eventType == 8):
-            inGame = False
-            currentGame.winner = eventObject.winner_num
-            games.append(currentGame)
-            currentGame = SQLGameStart()
-    if(inGame):
-        games.append(currentGame)
-    return games
-                
-
-def extractPlayerEvents(eventQueue, game_ids):
-    #Here there be dragons
-    playerEvents = []
-    activeEvent = SQLPlayerEvent()
-    inEvent = False
-    lastTimestamp = ""
-    lastPlayerHand = []
-    lastComputerHand = []
-    currentBoardState = []
-    board_vals = []
-    game_id = 0
-    board_size = 0
-    
-    while(eventQueue):
-        curEvent = eventQueue.pop(0)
-        eventType = curEvent[0]
-        eventObject = curEvent[2]
-        eventTS = curEvent[1]
-        if (eventType == 2):
-            lastTimestamp = eventTS
-            board_size =  eventObject.board_size[0] * eventObject.board_size[1]
-            currentBoardState = [0]*board_size
-            game_id = game_ids.pop(0)
-        if (eventType == 7):
-            activeEvent.game_id = game_id
-            activeEvent.is_swap = 0
-            activeEvent.timestamp = convertToSQLTimestamp(eventTS)
-            activeEvent.play_time = getTimestampDifference(lastTimestamp, eventTS)
-            activeEvent.player_num = eventObject.player_num
-            lastTimestamp=eventTS
-            if (eventObject.is_successful == True):
-                activeEvent.is_successful = 1
-                diff = generateBoardDif(eventObject, currentBoardState, board_size)
-                currentBoardState =   diff.taken_matrix
-                board_diff_id = dc.save_board_diff(diff.x, diff.y, diff.taken_matrix, diff.player_num)
-                activeEvent.board_diff_id = board_diff_id
-            playerEvents.append(activeEvent)
-            activeEvent = SQLPlayerEvent()
-        if (eventType == 6):
-            activeEvent.game_id = game_id
-            activeEvent.is_swap = 1
-            activeEvent.timestamp = convertToSQLTimestamp(eventTS)
-            activeEvent.play_time = getTimestampDifference(lastTimestamp, eventTS)
-            activeEvent.player_num = eventObject.player_num
-            lastTimestamp=eventTS
-            activeEvent.is_successful = 1
-            playerEvents.append(activeEvent)
-            activeEvent = SQLPlayerEvent()
-    return playerEvents
-            
+def get_timestamp_difference(early, late):
+    fmt = '%m/%d/%Y %I:%M:%S %p'
+    earlystamp = datetime.strptime(early, fmt)
+    latestamp = datetime.strptime(late, fmt)
+    time_elapsed = latestamp-earlystamp
+    return time_elapsed
 
 
-def generateCardDif():
-    pass
+def convert_to_SQL_timestamp(time):
+    fmt = '%m/%d/%Y %I:%M:%S %p'
+    raw_time = datetime.strptime(time, fmt)
+    return raw_time
 
-def generateBoardDif(play, last_board_state, board_size):
+
+def generate_board_dif(play, last_board_state, board_size):
     diff = SQLBoardDiff()
     diff.x = play.square_id[0]
     diff.y = play.square_id[1]
     diff.player_num = play.player_num
     diff.taken_matrix = last_board_state.copy()
     offset = diff.y*isqrt(board_size)+diff.x
-    diff.taken_matrix[offset] =1
+    diff.taken_matrix[offset] = 1
     return diff
 
-def getTimestampDifference(early, late):
-    fmt = '%m/%d/%Y %I:%M:%S %p'
-    earlystamp =  datetime.strptime(early, fmt)
-    latestamp = datetime.strptime(late, fmt)
-    time_elapsed = latestamp-earlystamp
-    return time_elapsed
 
-def convertToSQLTimestamp(time):
-     fmt = '%m/%d/%Y %I:%M:%S %p'
-     goal = '%Y-%m-%d %H:%M:%S'
-     raw_time=datetime.strptime(time, fmt)
-     return raw_time
+def unpack_nyingi_events(events):
+    global event_classes
+    objects = []
+    for event in events:
+        class_type = event_classes[event.event_id]
+        objects.append((event.event_id, event.timestamp,
+                       class_type(**jsonLoad(event.json_string))))
+    rebuild_game(objects)
 
 
+def rebuild_game(objects):
+    game_start_events = []
+    player_events = []
+    for event in objects:
+        event_type = event[0]
+        if (event_type in [0, 2, 8, 3, 4]):
+            game_start_events.append(event)
+        if (event_type in [7, 3, 5, 2, 6]):
+            player_events.append(event)
+    game_structures = extract_games(game_start_events)
+    game_ids = []
+    for game in game_structures:
+        game_ids.append(dc.save_game_table(game.board_area, game.max_value, game.computer_difficulty,
+                        game.game_name, game.board_state, game.winner, game.computer_hand, game.player_hand))
+    player_events = extract_player_events(player_events, game_ids)
+    for player_event in player_events:
+        dc.save_player_events(player_event.player_num, player_event.player_id, player_event.is_swap, player_event.is_successful,
+                              player_event.timestamp, player_event.play_time, player_event.card_diff_id, player_event.board_diff_id, player_event.game_id)
+
+
+def extract_games(event_queue):
+    games = []
+    # Fun fact: Lists evaluate to true in python while they are not empty!
+    # This may be the worst piece of code I've ever written.
+    current_game = SQLGameStart()
+    in_game = False
+    while (event_queue):
+        cur_event = event_queue.pop(0)
+        event_type = cur_event[0]
+        event_object = cur_event[2]
+        if (event_type == 0):
+            if (in_game):
+                games.append(current_game)
+                current_game = SQLGameStart()
+                current_game.game_name = event_object.game_name
+            else:
+                current_game.game_name = event_object.game_name
+                in_game = True
+        if (event_type == 2):
+            current_game.computer_difficulty = event_object.difficulty
+            current_game.board_area = event_object.board_size[0] * \
+                event_object.board_size[1]
+            current_game.max_value = event_object.number_range[0] * \
+                event_object.number_range[1]
+            for x in range(7):
+                player_draw_event = event_queue.pop(0)
+                if (player_draw_event[0] == 3):
+                    card_value = value_convert(player_draw_event[2].card_value)
+                    current_game.player_hand.append(card_value)
+                else:
+                    # If we don't even draw all the cards
+                    # the data can't possibly be that useful.
+                    current_game = SQLGameStart()
+                computer_draw_event = event_queue.pop(0)
+                if (computer_draw_event[0] == 3):
+                    card_value = value_convert(player_draw_event[2].card_value)
+                    current_game.computer_hand.append(card_value)
+                else:
+                    current_game = SQLGameStart()
+        if (event_type == 4):
+            current_game.board_state = event_object.board_tiles
+        if (event_type == 8):
+            in_game = False
+            current_game.winner = event_object.winner_num
+            games.append(current_game)
+            current_game = SQLGameStart()
+    if (in_game):
+        games.append(current_game)
+    return games
+
+
+def extract_player_events(event_queue, game_ids):
+    # Here there be dragons
+    player_events = []
+    active_event = SQLPlayerEvent()
+    last_timestamp = ""
+    player_hand = []
+    computer_hand = []
+    current_board_state = []
+    game_id = 0
+    board_size = 0
+    requeue = []
+    while (event_queue):
+        cur_event = event_queue.pop(0)
+        event_type = cur_event[0]
+        event_object = cur_event[2]
+        event_TS = cur_event[1]
+        if (event_type == 2):
+            last_timestamp = event_TS
+            board_size = event_object.board_size[0] * \
+                event_object.board_size[1]
+            current_board_state = [0]*board_size
+            game_id = game_ids.pop(0)
+            player_hand = []
+            computer_hand = []
+            for x in range(7):
+                player_draw_event = event_queue.pop(0)
+                if (player_draw_event[0] == 3):
+                    card_value = value_convert(player_draw_event[2].card_value)
+                    player_hand.append(card_value)
+                computer_draw_event = event_queue.pop(0)
+                if (computer_draw_event[0] == 3):
+                    card_value = value_convert(computer_draw_event[2].card_value)
+                    computer_hand.append(card_value)
+        elif (event_type == 3 and event_object.description.__contains__('2')):
+            requeue.append(cur_event)
+        elif (event_type == 7):
+            active_event.game_id = game_id
+            active_event.is_swap = 0
+            active_event.timestamp = convert_to_SQL_timestamp(event_TS)
+            active_event.play_time = get_timestamp_difference(
+                last_timestamp, event_TS)
+            active_event.player_num = event_object.player_num
+            last_timestamp = event_TS
+            if (event_object.is_successful):
+                active_event.is_successful = 1
+                diff = generate_board_dif(
+                    event_object, current_board_state, board_size)
+                current_board_state = diff.taken_matrix
+                board_diff_id = dc.save_board_diff(
+                    diff.x, diff.y, diff.taken_matrix, diff.player_num)
+                active_event.board_diff_id = board_diff_id
+                if (event_object.player_num == 1):
+                    hand = player_hand
+                else:
+                    hand = computer_hand
+                    for event in requeue:
+                        event_queue.insert(0, event)
+                    requeue = []
+                cards_drawn = []
+                cards_played = []
+                previous_hand = hand.copy()
+                for card in event_object.cards_played:
+                    card_event = event_queue.pop(0)
+                    value = value_convert(card_event[2].card_value)
+                    played = value_convert(card)
+                    cards_drawn.append(value)
+                    cards_played.append(played)
+                    hand.append(value)
+                    hand.remove(played)
+                card_diff_id = dc.save_card_diff(previous_hand, cards_played, cards_drawn, event_object.player_num)
+                active_event.card_diff_id = card_diff_id
+            player_events.append(active_event)
+            active_event = SQLPlayerEvent()
+        elif (event_type == 6):
+            if (event_object.player_num == 1):
+                hand = player_hand
+            else:
+                hand = computer_hand
+            active_event.game_id = game_id
+            active_event.is_swap = 1
+            active_event.timestamp = convert_to_SQL_timestamp(event_TS)
+            active_event.play_time = get_timestamp_difference(
+                last_timestamp, event_TS)
+            active_event.player_num = event_object.player_num
+            last_timestamp = event_TS
+            active_event.is_successful = 1
+            cards_drawn = []
+            cards_swapped = []
+            previous_hand = hand.copy()
+            for card in event_object.swapped_cards:
+                card_event = event_queue.pop(0)
+                value = value_convert(card_event[2].card_value)
+                swapped = value_convert(card)
+                cards_drawn.append(value)
+                cards_swapped.append(swapped)
+                hand.append(value)
+                hand.remove(swapped)
+            card_diff_id = dc.save_card_diff(previous_hand, cards_swapped, cards_drawn, event_object.player_num)
+            active_event.card_diff_id = card_diff_id
+            player_events.append(active_event)
+            active_event = SQLPlayerEvent()
+    return player_events
