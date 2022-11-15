@@ -296,8 +296,6 @@ def extract_player_events(event_queue, game_ids):
                 cards_drawn.append(value)
                 cards_swapped.append(swapped)
                 hand.append(value)
-                print(swapped)
-                print(hand)
                 hand.remove(swapped)
             card_diff_id = dc.save_card_diff(previous_hand, cards_swapped, cards_drawn, event_object.player_num)
             active_event.card_diff_id = card_diff_id
