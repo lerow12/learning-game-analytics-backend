@@ -83,6 +83,10 @@ def get_timestamp_difference(early, late):
     earlystamp = datetime.strptime(early, fmt)
     latestamp = datetime.strptime(late, fmt)
     time_elapsed = latestamp-earlystamp
+    time_elapsed = str(time_elapsed)
+    if len(time_elapsed) == 7:
+        time_elapsed = "0" + time_elapsed
+    print(time_elapsed)
     return time_elapsed
 
 
