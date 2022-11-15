@@ -8,9 +8,9 @@ password = "password"
 
 #  Converts a list of ints into a hexadecimal string representation
 def list_to_varbinary(arr):
-    varbinary = ["0x"]
+    varbinary = []
     for num in arr:
-        varbinary.append(hex(num)[2:].rjust(3,"0"))
+        varbinary.append(bin(num)[2:])
     string = ''.join(varbinary)
     return string
 

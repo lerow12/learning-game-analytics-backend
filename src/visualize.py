@@ -62,7 +62,11 @@ try:
         max_widths[index] = max(max_widths[index], len(header))
     for row in result:
         for index, cell in enumerate(row):
-            max_widths[index] = max(max_widths[index], len(str(cell)))
+            if type(cell) == bytearray:
+                cell = cell.decode()
+            if type(cell) != str:
+                cell = str(cell)
+            max_widths[index] = max(max_widths[index], len(cell))
     
     # Format print the collumn headers
     print_row(max_widths, headers, header=True)
