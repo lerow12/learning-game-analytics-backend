@@ -3,7 +3,7 @@ Create_Player_Events = "CREATE TABLE PlayerEvents\
 (event_id INT AUTO_INCREMENT PRIMARY KEY, \
 player_num INT NOT NULL, player_id INT, \
 is_swap BIT NOT NULL, is_successful BIT, \
-timestamp TIMESTAMP, play_time TIME, \
+timestamp TIMESTAMP, play_time TIME, inputs VARCHAR(27), \
 card_diff_id INT, board_diff_id INT, game_id INT, \
 FOREIGN KEY (card_diff_id) REFERENCES CardDiff(card_diff_id), \
 FOREIGN KEY (board_diff_id) REFERENCES BoardDiff(board_diff_id), \
