@@ -19,7 +19,7 @@ cards_gained VARCHAR(20), player_num INT);"
 Create_BoardDif = "CREATE TABLE BoardDiff\
 (board_diff_id INT AUTO_INCREMENT PRIMARY KEY, \
 x INT, y INT, \
-taken_matrix VARBINARY(256), player_num INT);"
+taken_matrix VARCHAR(256), player_num INT);"
 
 Create_GameTable = "CREATE TABLE GameTable\
 (game_id INT AUTO_INCREMENT PRIMARY KEY, \

@@ -6,15 +6,6 @@ user = "test"
 password = "password"
 
 
-#  Converts a list of ints into a hexadecimal string representation
-def list_to_varbinary(arr):
-    varbinary = []
-    for num in arr:
-        varbinary.append(bin(num)[2:])
-    string = ''.join(varbinary)
-    return string
-
-
 def delimit(list):
     charlist = ""
     for x in list:
@@ -53,7 +44,7 @@ def save_board_diff(x, y, taken_matrix, player_num):
         database=database_name
     )
     cur = con.cursor()
-    taken_matrix = list_to_varbinary(taken_matrix)
+    taken_matrix = delimit(taken_matrix)
     cur.execute(f"""
         INSERT INTO BoardDiff(x, y, taken_matrix, player_num)
         VALUES({x}, {y}, '{taken_matrix}', {player_num});
