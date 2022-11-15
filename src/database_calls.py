@@ -85,7 +85,7 @@ def save_card_diff(hand, cards_used, cards_gained, player_num):
     return diff_id
 
 
-def save_player_events(player_num, player_id, is_swap, is_successful, timestamp, play_time, card_diff_id, board_diff_id, game_id):
+def save_player_events(player_num, player_id, is_swap, is_successful, timestamp, play_time, inputs, card_diff_id, board_diff_id, game_id):
     con = mysql.connector.connect(
         host=host,
         user=user,
@@ -97,9 +97,13 @@ def save_player_events(player_num, player_id, is_swap, is_successful, timestamp,
         card_diff_id = "NULL"
     if (board_diff_id == 0):
         board_diff_id = "NULL"
+    if (inputs == []):
+        inputs = "NULL"
+    else:
+        inputs = delimit(inputs)
     cur.execute(f"""
-        INSERT INTO PlayerEvents(player_num, player_id, is_swap, is_successful, timestamp, play_time, card_diff_id, board_diff_id, game_id)
-        VALUES({player_num}, {player_id}, {is_swap}, {is_successful}, '{timestamp}', '{play_time}', {card_diff_id}, {board_diff_id}, {game_id});
+        INSERT INTO PlayerEvents(player_num, player_id, is_swap, is_successful, timestamp, play_time, inputs, card_diff_id, board_diff_id, game_id)
+        VALUES({player_num}, {player_id}, {is_swap}, {is_successful}, '{timestamp}', '{play_time}', '{inputs}', {card_diff_id}, {board_diff_id}, {game_id});
     """)
     con.commit()
     con.close()

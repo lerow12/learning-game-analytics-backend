@@ -33,6 +33,7 @@ class SQLPlayerEvent():
         self.card_diff_id = 0
         self.board_diff_id = 0
         self.game_id = 0
+        self.inputs = []
 
 
 class SQLBoardDiff():
@@ -129,7 +130,7 @@ def rebuild_game(objects):
     player_events = extract_player_events(player_events, game_ids)
     for player_event in player_events:
         dc.save_player_events(player_event.player_num, player_event.player_id, player_event.is_swap, player_event.is_successful,
-                              player_event.timestamp, player_event.play_time, player_event.card_diff_id, player_event.board_diff_id, player_event.game_id)
+                              player_event.timestamp, player_event.play_time, player_event.inputs, player_event.card_diff_id, player_event.board_diff_id, player_event.game_id)
 
 
 def extract_games(event_queue):
@@ -216,7 +217,7 @@ def extract_player_events(event_queue, game_ids):
                 if (computer_draw_event[0] == 3):
                     card_value = value_convert(computer_draw_event[2].card_value)
                     computer_hand.append(card_value)
-        elif (event_type == 3 and event_object.description.__contains__('2')):
+        elif ((event_type == 3 and event_object.description.__contains__('2')) or event_type == 5):
             requeue.append(cur_event)
         elif (event_type == 7):
             active_event.game_id = game_id
@@ -254,6 +255,22 @@ def extract_player_events(event_queue, game_ids):
                     hand.remove(played)
                 card_diff_id = dc.save_card_diff(previous_hand, cards_played, cards_drawn, event_object.player_num)
                 active_event.card_diff_id = card_diff_id
+            else:
+                if (event_object.player_num == 1):
+                    hand = player_hand
+                else:
+                    hand = computer_hand
+                cards_drawn = []
+                cards_played = []
+                for card in event_object.cards_played:
+                    cards_played.append(value_convert(card))
+                card_diff_id = dc.save_card_diff(hand, cards_played, [], event_object.player_num)
+                active_event.card_diff_id = card_diff_id
+            inputs = []
+            for event in requeue:
+                inputs.append(event[2].value)
+            active_event.inputs = inputs
+            requeue = []
             player_events.append(active_event)
             active_event = SQLPlayerEvent()
         elif (event_type == 6):
