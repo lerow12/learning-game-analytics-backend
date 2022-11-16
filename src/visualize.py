@@ -80,6 +80,8 @@ if args.querry:
         
         # Plot the data
         plt.plot(data[headers[0]], data[headers[1]])
+        plt.xlabel(headers[0])
+        plt.ylabel(headers[1])
         plt.show()
 
 else:
