@@ -2,7 +2,6 @@ import mysql.connector
 from mysql.connector import errorcode
 import argparse
 import matplotlib.pyplot as plt
-from curses import wrapper
 from menu_mode import main_menu
 from print_helper import get_max_widths, print_row
 
@@ -74,6 +73,10 @@ if args.querry:
         data = {}
         for index in range(len(result[0])):
             data[headers[index]] = [row[index] for row in result]
+        
+        for row in data.values():
+            for index in range(len(row)):
+                row[index] = str(row[index])
         
         # Plot the data
         plt.plot(data[headers[0]], data[headers[1]])
