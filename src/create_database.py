@@ -50,4 +50,5 @@ def create_tables(host, user, password, database_name, query_list):
         init_db_cursor.execute(query)
 
 
-create_database(host, user, password, database_name, nyingi_query_list)
+if __name__ == "__main__":
+    create_database(host, user, password, database_name, nyingi_query_list)
