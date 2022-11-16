@@ -1,11 +1,15 @@
 import mysql.connector
-import database_strings as dbs 
+import database_strings as dbs
+import sys 
 """Repackages events and stores them in mysql database"""
 # Temporary Credentials. Replace with your own to test.
+if (not (len(sys.argv)) == 3):
+    print("Please enter in a host and database user.")
+    exit()
 database_name = "NyingiDatabase"
-host = "localhost"
-user = "test"
-password = "password"
+host = sys.argv[1]
+user = sys.argv[2]
+password = input("Enter password: ")
 nyingi_query_list = [
         dbs.Create_BoardDif,
         dbs.Create_CardDif,
