@@ -1,7 +1,7 @@
 import mysql.connector
 from mysql.connector import errorcode
 import argparse
-import datetime
+from pandas import DataFrame
 
 
 # Temp Creds
@@ -18,6 +18,7 @@ msg = "Learning Game Analytics Visualizer"
 parser = argparse.ArgumentParser(description=msg)
 
 # Add Optional Arguments
+parser.add_argument("-p", "--plot", help = "Plot the SQL Table", action = "store_true")
 parser.add_argument("-q", "--querry", metavar = "SQL Querry", required = True, help = "Return SQL Querry Result")
 
 # Read arguments from command line
@@ -86,3 +87,10 @@ except mysql.connector.Error as err:
 else:
     cnx.close()
 
+if args.plot:
+    data = {}
+    for index in range(len(result[0])):
+        data[headers[index]] = [row[index] for row in result]
+    
+    data_frame = DataFrame(data)
+    print(data_frame)
