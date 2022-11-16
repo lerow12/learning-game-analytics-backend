@@ -1,1 +1,2 @@
-SELECT play_time, play_time FROM PlayerEvents;
+SELECT play_time, play_time 
+FROM PlayerEvents;
