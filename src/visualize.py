@@ -1,7 +1,10 @@
 import mysql.connector
 from mysql.connector import errorcode
 import argparse
-from pandas import DataFrame
+import matplotlib.pyplot as plt
+from curses import wrapper
+from menu_mode import main_menu
+from print_helper import get_max_widths, print_row
 
 
 # Temp Creds
@@ -18,34 +21,33 @@ msg = "Learning Game Analytics Visualizer"
 parser = argparse.ArgumentParser(description=msg)
 
 # Add Optional Arguments
-parser.add_argument("-p", "--plot", help = "Plot the SQL Table", action = "store_true")
-parser.add_argument("-q", "--querry", metavar = "SQL Querry", required = True, help = "Return SQL Querry Result")
+parser.add_argument("-p", "--plot", help = "Plot 2 Collumn SQL Table [Requires -q]", action = "store_true")
+parser.add_argument("-q", "--querry", metavar = "SQL Querry", help = "Return SQL Querry Result")
 
 # Read arguments from command line
 args = parser.parse_args()
 
-
-def print_row(max_widths, row, header=False):
-    """Prints a database table row with each cell the max_width size"""
-    print("| ", end="")
-    for index, arg in enumerate(row):
-        if type(arg) != str:
-            arg = str(arg)
-        print(f"{arg:^{max_widths[index]}} | ", end="")
-    print()
-    if header:
-        for _ in range(sum(max_widths.values()) + 3 * len(row) + 1):
-            print("-", end="")
-        print()
-
-
-# Attempt to run SQL Querry
+# Attempt to open a database connection
 try:
     cnx = mysql.connector.connect(
         host=host,
         user=user,
         password=password,
         database=database_name)
+
+# Catch DB Exeptions
+except mysql.connector.Error as err:
+    if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
+        print("Something is wrong with your user name or password")
+    elif err.errno == errorcode.ER_BAD_DB_ERROR:
+        print("Database does not exist")
+    else:
+        print(err)
+    exit()
+
+
+# Attempt to run SQL Querry
+if args.querry:
     db_cursor = cnx.cursor()
     db_cursor.execute(args.querry)
 
@@ -54,16 +56,7 @@ try:
     result = db_cursor.fetchall()
 
     # Get the length of the longest cell in a collumn and store it in max_widths
-    max_widths = {}
-    for index, header in enumerate(headers):
-        if index not in max_widths.keys():
-            max_widths[index] = 0
-        max_widths[index] = max(max_widths[index], len(header))
-    for row in result:
-        for index, cell in enumerate(row):
-            if type(cell) != str:
-                cell = str(cell)
-            max_widths[index] = max(max_widths[index], len(cell))
+    max_widths = get_max_widths(headers, result)
     
     # Format print the collumn headers
     print_row(max_widths, headers, header=True)
@@ -74,23 +67,19 @@ try:
 
     db_cursor.close()
 
-# Catch DB Exeptions
-except mysql.connector.Error as err:
-    if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
-        print("Something is wrong with your user name or password")
-    elif err.errno == errorcode.ER_BAD_DB_ERROR:
-        print("Database does not exist")
-    else:
-        print(err)
 
-# Close DB
+    # Graph the first two collumns as an x and y plot
+    if args.plot:
+        # Flip the rows and collumns
+        data = {}
+        for index in range(len(result[0])):
+            data[headers[index]] = [row[index] for row in result]
+        
+        # Plot the data
+        plt.plot(data[headers[0]], data[headers[1]])
+        plt.show()
+
 else:
-    cnx.close()
+    main_menu(cnx)
 
-if args.plot:
-    data = {}
-    for index in range(len(result[0])):
-        data[headers[index]] = [row[index] for row in result]
-    
-    data_frame = DataFrame(data)
-    print(data_frame)
+cnx.close()
