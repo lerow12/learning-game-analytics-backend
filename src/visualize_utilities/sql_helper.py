@@ -28,13 +28,13 @@ def get_max_widths(headers, result):
             max_widths[index] = max(max_widths[index], len(cell))
     return max_widths
 
-def print_querry(cnx, querry):
+def print_query(cnx, query):
     db_cursor = cnx.cursor()
     try:
-        db_cursor.execute(querry)
+        db_cursor.execute(query)
     except:
         os.system("cls" if os.name == "nt" else "clear")
-        print("Invalid Querry")
+        print("Invalid query")
         time.sleep(1)
         return None
 

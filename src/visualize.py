@@ -3,7 +3,7 @@ from mysql.connector import errorcode
 import argparse
 import matplotlib.pyplot as plt
 from visualize_utilities.menu_mode import main_menu
-from visualize_utilities.sql_helper import print_querry
+from visualize_utilities.sql_helper import print_query
 
 
 # Temp Creds
@@ -21,7 +21,7 @@ parser = argparse.ArgumentParser(description=msg)
 
 # Add Optional Arguments
 parser.add_argument("-p", "--plot", help = "Plot 2 Collumn SQL Table [Requires -q]", action = "store_true")
-parser.add_argument("-q", "--querry", metavar = "SQL Querry", help = "Return SQL Querry Result")
+parser.add_argument("-q", "--query", metavar = "SQL Query", help = "Return SQL Query Result")
 
 # Read arguments from command line
 args = parser.parse_args()
@@ -45,10 +45,10 @@ except mysql.connector.Error as err:
     exit()
 
 
-# Attempt to run SQL Querry
-if args.querry:
-    # Get headers and result from sql querry
-    table = print_querry(cnx, args.querry)
+# Attempt to run SQL query
+if args.query:
+    # Get headers and result from sql query
+    table = print_query(cnx, args.query)
 
     if table:
         headers, result = table

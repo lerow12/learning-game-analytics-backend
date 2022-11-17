@@ -2,7 +2,7 @@ import time
 import os
 import matplotlib.pyplot as plt
 import getpass as gp
-from visualize_utilities.sql_helper import print_querry
+from visualize_utilities.sql_helper import print_query
 from create_database import create_database, delete_database
 import database_strings as dbs
 
@@ -12,7 +12,7 @@ def main_menu(cnx):
     header = f"|{'Interactive Visualize.py Mode':^{width - 2}}|"
     menu_items = [
             "Show All Tables",
-            "Run Querry",
+            "Run Query",
             "Show Game By ID",
             "Plot DB Avg. Play Time Vs. Square Number",
             "Plot DB Frequency of Cards Used",
@@ -62,18 +62,18 @@ def main_menu(cnx):
         
         # OPTION 1
         if user_option == 1:
-            print_querry(cnx, "SHOW TABLES;")
+            print_query(cnx, "SHOW TABLES;")
         
         # OPTION 2
         elif user_option == 2:
-            querry = input("Enter a querry: ")
-            if querry:
+            query = input("Enter a query: ")
+            if query:
                 print()
-                if not print_querry(cnx, querry):
+                if not print_query(cnx, query):
                     continue
             else:
                 os.system("cls" if os.name == "nt" else "clear")
-                print("Invalid Querry")
+                print("Invalid Query")
                 time.sleep(1)
                 continue
         
@@ -89,17 +89,17 @@ def main_menu(cnx):
                 time.sleep(1)
                 continue
             
-            game_querry = f"""
+            game_query = f"""
             SELECT board_area, max_value, computer_difficulty, game_name, board_state, winner
             FROM GameTable
             WHERE game_id={game_id}
             """
-            if not print_querry(cnx, game_querry):
+            if not print_query(cnx, game_query):
                 continue
 
             print()
 
-            event_querry = f"""
+            event_query = f"""
             SELECT PlayerEvents.player_num, is_swap, is_successful, timestamp, play_time, x, y,
             hand, cards_used, inputs, cards_gained
             FROM PlayerEvents LEFT JOIN BoardDiff
@@ -108,18 +108,18 @@ def main_menu(cnx):
             ON PlayerEvents.card_diff_id=CardDiff.card_diff_id
             WHERE PlayerEvents.game_id={game_id}
             """
-            if not print_querry(cnx, event_querry):
+            if not print_query(cnx, event_query):
                 continue
         
         # OPTION 4
         elif user_option == 4:
-            querry = """
+            query = """
             SELECT play_time, cards_used, inputs
             FROM PlayerEvents JOIN CardDiff
             ON PlayerEvents.card_diff_id=CardDiff.card_diff_id
             WHERE is_swap=0 AND PlayerEvents.player_num=1 AND is_successful=1
             """
-            table = print_querry(cnx, querry)
+            table = print_query(cnx, query)
 
             if table:
                 headers, result = table
@@ -162,13 +162,13 @@ def main_menu(cnx):
 
         # OPTION 5
         elif user_option == 5:
-            querry = """
+            query = """
             SELECT cards_used
             FROM PlayerEvents JOIN CardDiff
             ON PlayerEvents.card_diff_id=CardDiff.card_diff_id
             WHERE PlayerEvents.player_num=1 AND is_swap=0
             """
-            table = print_querry(cnx, querry)
+            table = print_query(cnx, query)
 
             if table:
                 headers, result = table
@@ -199,13 +199,13 @@ def main_menu(cnx):
         
         # OPTION 6
         elif user_option == 6:
-            querry = """
+            query = """
             SELECT cards_used
             FROM PlayerEvents JOIN CardDiff
             ON PlayerEvents.card_diff_id=CardDiff.card_diff_id
             WHERE PlayerEvents.player_num=1 AND is_swap=1
             """
-            table = print_querry(cnx, querry)
+            table = print_query(cnx, query)
 
             if table:
                 headers, result = table
@@ -236,13 +236,13 @@ def main_menu(cnx):
 
         # OPTION 7
         elif user_option == 7:
-            querry = """
+            query = """
             SELECT computer_difficulty, COUNT(*)
             FROM GameTable
             WHERE winner=1
             GROUP BY computer_difficulty
             """
-            table = print_querry(cnx, querry)
+            table = print_query(cnx, query)
 
             if table:
                 headers, result = table
