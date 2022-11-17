@@ -1,6 +1,7 @@
 import mysql.connector
 import database_strings as dbs
 import sys 
+import getpass as gp
 """Repackages events and stores them in mysql database"""
 # Temporary Credentials. Replace with your own to test.
 
@@ -16,10 +17,15 @@ def delete_database(host, user, password, database_name):
 
 
 def create_database(host, user, password, database_name, query_list):
-    init_database = mysql.connector.connect(
-        host=host,
-        user=user,
-        password=password)
+    try:
+        init_database = mysql.connector.connect(
+            host=host,
+            user=user,
+            password=password)
+    except:
+        print("ERROR: Incorrect Credentials")
+        exit()
+    
     init_db_cursor = init_database.cursor()
     init_db_cursor.execute("CREATE DATABASE {};".format(database_name))
     init_db_cursor.close()
@@ -44,7 +50,8 @@ if __name__ == "__main__":
     database_name = "NyingiDatabase"
     host = sys.argv[1]
     user = sys.argv[2]
-    password = input("Enter password: ")
+    password = gp.getpass(prompt = "Enter password: ")
+
     nyingi_query_list = [
             dbs.Create_BoardDif,
             dbs.Create_CardDif,
