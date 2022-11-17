@@ -13,6 +13,8 @@ def main_menu(cnx):
             "Show Game By ID",
             "Plot DB Avg. Play Time Vs. Square Number",
             "Plot DB Frequency of Cards Used",
+            "Plot DB Frequency of Cards Swapped",
+            "Plot DB Wins vs Difficulty",
             "Exit"
         ]
     
@@ -110,7 +112,7 @@ def main_menu(cnx):
             SELECT play_time, cards_used, inputs
             FROM PlayerEvents JOIN CardDiff
             ON PlayerEvents.card_diff_id=CardDiff.card_diff_id
-            WHERE is_swap=0 AND PlayerEvents.player_num=1
+            WHERE is_swap=0 AND PlayerEvents.player_num=1 AND is_successful=1
             """
             table = print_querry(cnx, querry)
 
@@ -150,14 +152,16 @@ def main_menu(cnx):
             plt.bar(list(axis_data.keys()), list(axis_data.values()), width=0.5, color='blue')
             plt.xlabel("Board Number")
             plt.ylabel("Average Play Time (seconds)")
+            plt.title("Avg. Play Time Vs. Board Number")
             plt.show()
 
         # OPTION 5
         elif user_option == 5:
             querry = """
             SELECT cards_used
-            FROM CardDiff
-            WHERE player_num=1
+            FROM PlayerEvents JOIN CardDiff
+            ON PlayerEvents.card_diff_id=CardDiff.card_diff_id
+            WHERE PlayerEvents.player_num=1 AND is_swap=0
             """
             table = print_querry(cnx, querry)
 
@@ -181,11 +185,78 @@ def main_menu(cnx):
             plt.barh(list(axis_data.keys()), list(axis_data.values()), 0.5, color='blue')
             
             for index, value in enumerate(list(axis_data.values())):
-                plt.text(value + 0.1, index - 0.15, str(value), color='blue', fontweight='bold')
+                plt.text(value + 0.05, index, str(value), color='blue', fontweight='bold')
             
             plt.xlabel("Frequency")
             plt.ylabel("Card Value")
+            plt.title("Frequency of Played Cards")
             plt.show()
+        
+        # OPTION 6
+        elif user_option == 6:
+            querry = """
+            SELECT cards_used
+            FROM PlayerEvents JOIN CardDiff
+            ON PlayerEvents.card_diff_id=CardDiff.card_diff_id
+            WHERE PlayerEvents.player_num=1 AND is_swap=1
+            """
+            table = print_querry(cnx, querry)
+
+            if table:
+                headers, result = table
+            else:
+                continue
+            
+            # Store axis data
+            axis_data = {}
+
+            for data in result:
+                cards = data[0].split(" ")
+                for card in cards:
+                    if card in axis_data:
+                        axis_data[card] += 1
+                    else:
+                        axis_data[card] = 1
+            
+            # Plot the data
+            plt.barh(list(axis_data.keys()), list(axis_data.values()), 0.5, color='blue')
+            
+            for index, value in enumerate(list(axis_data.values())):
+                plt.text(value + 0.05, index, str(value), color='blue', fontweight='bold')
+            
+            plt.xlabel("Frequency")
+            plt.ylabel("Card Value")
+            plt.title("Frequency of Swapped Cards")
+            plt.show()
+
+        # OPTION 7
+        elif user_option == 7:
+            querry = """
+            SELECT computer_difficulty, COUNT(*)
+            FROM GameTable
+            WHERE winner=1
+            GROUP BY computer_difficulty
+            """
+            table = print_querry(cnx, querry)
+
+            if table:
+                headers, result = table
+            else:
+                continue
+
+            # Store axis data
+            axis_data = {}
+
+            for data in result:
+                axis_data[data[0]] = data[1]
+            
+            # Plot the data
+            plt.bar(list(axis_data.keys()), list(axis_data.values()), width=0.5, color='blue')
+            plt.xlabel("Computer Difficulty")
+            plt.ylabel("Player Wins")
+            plt.title("Wins Vs. Difficulty")
+            plt.show()
+
         
         print("\n")
         input("Press enter to go back to the menu...")
