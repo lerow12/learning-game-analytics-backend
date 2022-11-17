@@ -48,7 +48,12 @@ except mysql.connector.Error as err:
 # Attempt to run SQL Querry
 if args.querry:
     # Get headers and result from sql querry
-    headers, result = print_querry(cnx, args.querry)
+    table = print_querry(cnx, args.querry)
+
+    if table:
+        headers, result = table
+    else:
+        exit()
 
     # Graph the first two collumns as an x and y plot
     if args.plot:

@@ -9,6 +9,7 @@ def main_menu(cnx):
     menu_items = [
             "Show All Tables",
             "Run Querry",
+            "Show Game By ID",
             "Exit"
         ]
     
@@ -62,6 +63,29 @@ def main_menu(cnx):
                 os.system("cls" if os.name == "nt" else "clear")
                 print("Invalid Querry")
                 time.sleep(1)
+                continue
+        
+        elif user_option == 3:
+            game_id = input("Enter a game id: ")
+
+            try:
+                game_id = int(game_id)
+            except:
+                os.system("cls" if os.name == "nt" else "clear")
+                print("Invalid Game ID")
+                time.sleep(1)
+                continue
+            
+            querry = f"""
+            SELECT PlayerEvents.player_num, is_swap, is_successful, timestamp, play_time, x, y,
+            hand, cards_used, cards_gained
+            FROM PlayerEvents LEFT JOIN BoardDiff
+            ON PlayerEvents.board_diff_id=BoardDiff.board_diff_id
+            JOIN CardDiff
+            ON PlayerEvents.card_diff_id=CardDiff.card_diff_id
+            WHERE PlayerEvents.game_id={game_id}
+            """
+            if not print_querry(cnx, querry):
                 continue
         
         print("\n")
