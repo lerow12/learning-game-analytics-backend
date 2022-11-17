@@ -1,6 +1,6 @@
-import mysql.connector
 import time
-from print_helper import get_max_widths, print_row
+import os
+from sql_helper import print_querry
 
 
 def main_menu(cnx):
@@ -23,6 +23,7 @@ def main_menu(cnx):
             print(f"{string:{width}}")
 
     while(True):
+        os.system("cls" if os.name == "nt" else "clear")
         print_header()
         print_menu()
         user_input = input("\nSelect Option: ")
@@ -31,77 +32,37 @@ def main_menu(cnx):
         try:
             user_option = int(user_input)
         except:
-            print("\n\nInvalid Option")
+            os.system("cls" if os.name == "nt" else "clear")
+            print("Invalid Option")
             time.sleep(1)
-            print("\n")
             continue
 
         if user_option < 1 or user_option > len(menu_items):
-            print("\n\nInvalid Option")
+            os.system("cls" if os.name == "nt" else "clear")
+            print("Invalid Option")
             time.sleep(1)
-            print("\n")
             continue
     
         if user_option == len(menu_items):
             print("Exiting...")
             return
         
-        print("\n")
+        os.system("cls" if os.name == "nt" else "clear")
         
         if user_option == 1:
-            db_cursor = cnx.cursor()
-            db_cursor.execute("SHOW TABLES;")
-
-            # Get results and headers
-            headers = [header[0] for header in db_cursor.description]
-            result = db_cursor.fetchall()
-
-            # Get the length of the longest cell in a collumn and store it in max_widths
-            max_widths = get_max_widths(headers, result)
-            
-            # Format print the collumn headers
-            print_row(max_widths, headers, header=True)
-
-            # Format print each row
-            for row in result:
-                print_row(max_widths, row)
-
-            db_cursor.close()
+            print_querry(cnx, "SHOW TABLES;")
         
         elif user_option == 2:
-            db_cursor = cnx.cursor()
-            try:
-                querry = input("Enter a querry: ")
-                if querry:
-                    db_cursor.execute(querry)
-                else:
-                    print("\n\nInvalid Querry")
-                    time.sleep(1)
-                    print("\n")
+            querry = input("Enter a querry: ")
+            if querry:
+                print()
+                if not print_querry(cnx, querry):
                     continue
-            except:
-                print("\n\nInvalid Querry")
+            else:
+                os.system("cls" if os.name == "nt" else "clear")
+                print("Invalid Querry")
                 time.sleep(1)
-                print("\n")
                 continue
-
-            print("\n")
-
-            # Get results and headers
-            headers = [header[0] for header in db_cursor.description]
-            result = db_cursor.fetchall()
-
-            # Get the length of the longest cell in a collumn and store it in max_widths
-            max_widths = get_max_widths(headers, result)
-            
-            # Format print the collumn headers
-            print_row(max_widths, headers, header=True)
-
-            # Format print each row
-            for row in result:
-                print_row(max_widths, row)
-
-            db_cursor.close()
         
         print("\n")
         input("Press enter to go back to the menu...")

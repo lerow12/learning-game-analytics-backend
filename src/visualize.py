@@ -3,7 +3,7 @@ from mysql.connector import errorcode
 import argparse
 import matplotlib.pyplot as plt
 from menu_mode import main_menu
-from print_helper import get_max_widths, print_row
+from sql_helper import print_querry
 
 
 # Temp Creds
@@ -47,25 +47,8 @@ except mysql.connector.Error as err:
 
 # Attempt to run SQL Querry
 if args.querry:
-    db_cursor = cnx.cursor()
-    db_cursor.execute(args.querry)
-
-    # Get results and headers
-    headers = [header[0] for header in db_cursor.description]
-    result = db_cursor.fetchall()
-
-    # Get the length of the longest cell in a collumn and store it in max_widths
-    max_widths = get_max_widths(headers, result)
-    
-    # Format print the collumn headers
-    print_row(max_widths, headers, header=True)
-
-    # Format print each row
-    for row in result:
-        print_row(max_widths, row)
-
-    db_cursor.close()
-
+    # Get headers and result from sql querry
+    headers, result = print_querry(cnx, args.querry)
 
     # Graph the first two collumns as an x and y plot
     if args.plot:
