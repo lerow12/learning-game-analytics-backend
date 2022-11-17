@@ -27,7 +27,7 @@ class SQLPlayerEvent():
         self.player_num = 0
         self.player_id = -1
         self.is_swap = 0
-        self.is_successful = 1
+        self.is_successful = 0
         self.timestamp = ""
         self.play_time = 0
         self.card_diff_id = 0
@@ -86,7 +86,6 @@ def get_timestamp_difference(early, late):
     time_elapsed = str(time_elapsed)
     if len(time_elapsed) == 7:
         time_elapsed = "0" + time_elapsed
-    print(time_elapsed)
     return time_elapsed
 
 
