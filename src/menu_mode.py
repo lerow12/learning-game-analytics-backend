@@ -11,7 +11,7 @@ def main_menu(cnx):
             "Show All Tables",
             "Run Querry",
             "Show Game By ID",
-            "Plot Square Number Vs. Avg. Play Time",
+            "Plot Avg. Play Time Vs. Square Number",
             "Exit"
         ]
     
@@ -22,7 +22,7 @@ def main_menu(cnx):
     
     def print_menu():
         for index, item in enumerate(menu_items):
-            string = " "*(width//4) + f"{index + 1})  {item}"
+            string = " "*(width//8) + f"{index + 1})  {item}"
             print(f"{string:{width}}")
 
     while(True):
