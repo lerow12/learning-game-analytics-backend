@@ -1,11 +1,14 @@
 import time
 import os
-from visualize_utilities.sql_helper import print_querry
 import matplotlib.pyplot as plt
+import getpass as gp
+from visualize_utilities.sql_helper import print_querry
+from create_database import create_database, delete_database
+import database_strings as dbs
 
 
 def main_menu(cnx):
-    width = 50
+    width = 55
     header = f"|{'Interactive Visualize.py Mode':^{width - 2}}|"
     menu_items = [
             "Show All Tables",
@@ -15,6 +18,8 @@ def main_menu(cnx):
             "Plot DB Frequency of Cards Used",
             "Plot DB Frequency of Cards Swapped",
             "Plot DB Wins vs Difficulty",
+            "Create DB",
+            "Delete DB",
             "Exit"
         ]
     
@@ -25,7 +30,7 @@ def main_menu(cnx):
     
     def print_menu():
         for index, item in enumerate(menu_items):
-            string = " "*(width//12) + f"{index + 1})  {item}"
+            string = " "*(width//8) + f"{index + 1})" + " "*(2 - ((index + 1) // 10)) + f"{item}"
             print(f"{string:{width}}")
 
     while(True):
@@ -256,6 +261,29 @@ def main_menu(cnx):
             plt.ylabel("Player Wins")
             plt.title("Wins Vs. Difficulty")
             plt.show()
+
+        # OPTION 8
+        elif user_option == 8:
+            database_name = "NyingiDatabase"
+            host = input("Enter Host: ")
+            user = input("Enter User: ")
+            password = gp.getpass(prompt = "Enter password: ")
+
+            nyingi_query_list = [
+                    dbs.Create_BoardDif,
+                    dbs.Create_CardDif,
+                    dbs.Create_GameTable,
+                    dbs.Create_Player_Events]
+            create_database(host, user, password, database_name, nyingi_query_list)
+        
+        # OPTION 9
+        elif user_option == 9:
+            database_name = "NyingiDatabase"
+            host = input("Enter Host: ")
+            user = input("Enter User: ")
+            password = gp.getpass(prompt = "Enter password: ")
+
+            delete_database(host, user, password, database_name)
 
         
         print("\n")
