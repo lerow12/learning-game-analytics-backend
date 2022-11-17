@@ -1,6 +1,7 @@
 import time
 import os
 from sql_helper import print_querry
+import matplotlib.pyplot as plt
 
 
 def main_menu(cnx):
@@ -10,6 +11,7 @@ def main_menu(cnx):
             "Show All Tables",
             "Run Querry",
             "Show Game By ID",
+            "Plot Square Number Vs. Avg. Play Time",
             "Exit"
         ]
     
@@ -97,6 +99,53 @@ def main_menu(cnx):
             """
             if not print_querry(cnx, event_querry):
                 continue
+        
+        elif user_option == 4:
+            querry = """
+            SELECT play_time, cards_used, inputs
+            FROM PlayerEvents JOIN CardDiff
+            ON PlayerEvents.card_diff_id=CardDiff.card_diff_id
+            WHERE is_swap=0
+            """
+            table = print_querry(cnx, querry)
+
+            if table:
+                headers, result = table
+            else:
+                continue
+
+            # Flip the rows and collumns
+            axis_data = {}
+            
+            # Calculate space number and total time to play
+            for data in result:
+                cards = data[1].split(" ")
+                if data[2]:
+                    input_cards = data[2].split(" ")
+                    for input_card in input_cards:
+                        cards.append(input_card)
+                number = 1
+                for card in cards:
+                    try:
+                        number *= int(card)
+                    except:
+                        pass
+                number = str(number)
+                if number in axis_data:
+                    axis_data[number][0] += data[0].total_seconds()
+                    axis_data[number][1] += 1
+                else:
+                    axis_data[number] = [data[0].total_seconds(), 1]
+            
+            # Calculate average time to play
+            for key, value in axis_data.items():
+                axis_data[key] = value[0] / value[1]
+
+            # Plot the data
+            plt.bar(list(axis_data.keys()), list(axis_data.values()), width=0.5, color='blue')
+            plt.xlabel("Board Number")
+            plt.ylabel("Average Play Time (seconds)")
+            plt.show()
         
         print("\n")
         input("Press enter to go back to the menu...")
