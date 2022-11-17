@@ -86,7 +86,6 @@ def get_timestamp_difference(early, late):
     time_elapsed = str(time_elapsed)
     if len(time_elapsed) == 7:
         time_elapsed = "0" + time_elapsed
-    print(time_elapsed)
     return time_elapsed
 
 
