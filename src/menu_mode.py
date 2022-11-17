@@ -8,6 +8,7 @@ def main_menu(cnx):
     header = f"|{'Interactive Visualize.py Mode':^{width - 2}}|"
     menu_items = [
             "Show All Tables",
+            "Run Querry",
             "Exit"
         ]
     
@@ -45,15 +46,15 @@ def main_menu(cnx):
             print("Exiting...")
             return
         
-        elif user_option == 1:
+        print("\n")
+        
+        if user_option == 1:
             db_cursor = cnx.cursor()
             db_cursor.execute("SHOW TABLES;")
 
             # Get results and headers
             headers = [header[0] for header in db_cursor.description]
             result = db_cursor.fetchall()
-
-            print("\n")
 
             # Get the length of the longest cell in a collumn and store it in max_widths
             max_widths = get_max_widths(headers, result)
@@ -66,7 +67,43 @@ def main_menu(cnx):
                 print_row(max_widths, row)
 
             db_cursor.close()
+        
+        elif user_option == 2:
+            db_cursor = cnx.cursor()
+            try:
+                querry = input("Enter a querry: ")
+                if querry:
+                    db_cursor.execute(querry)
+                else:
+                    print("\n\nInvalid Querry")
+                    time.sleep(1)
+                    print("\n")
+                    continue
+            except:
+                print("\n\nInvalid Querry")
+                time.sleep(1)
+                print("\n")
+                continue
+
             print("\n")
-            input("Press enter to go back to the menu...")
-            print("\n")
+
+            # Get results and headers
+            headers = [header[0] for header in db_cursor.description]
+            result = db_cursor.fetchall()
+
+            # Get the length of the longest cell in a collumn and store it in max_widths
+            max_widths = get_max_widths(headers, result)
+            
+            # Format print the collumn headers
+            print_row(max_widths, headers, header=True)
+
+            # Format print each row
+            for row in result:
+                print_row(max_widths, row)
+
+            db_cursor.close()
+        
+        print("\n")
+        input("Press enter to go back to the menu...")
+        print("\n")
 
