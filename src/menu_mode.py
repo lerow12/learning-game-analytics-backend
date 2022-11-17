@@ -76,16 +76,26 @@ def main_menu(cnx):
                 time.sleep(1)
                 continue
             
-            querry = f"""
+            game_querry = f"""
+            SELECT board_area, max_value, computer_difficulty, game_name, board_state, winner
+            FROM GameTable
+            WHERE game_id={game_id}
+            """
+            if not print_querry(cnx, game_querry):
+                continue
+
+            print()
+
+            event_querry = f"""
             SELECT PlayerEvents.player_num, is_swap, is_successful, timestamp, play_time, x, y,
-            hand, cards_used, cards_gained
+            hand, cards_used, inputs, cards_gained
             FROM PlayerEvents LEFT JOIN BoardDiff
             ON PlayerEvents.board_diff_id=BoardDiff.board_diff_id
             JOIN CardDiff
             ON PlayerEvents.card_diff_id=CardDiff.card_diff_id
             WHERE PlayerEvents.game_id={game_id}
             """
-            if not print_querry(cnx, querry):
+            if not print_querry(cnx, event_querry):
                 continue
         
         print("\n")
