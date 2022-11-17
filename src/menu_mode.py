@@ -11,7 +11,8 @@ def main_menu(cnx):
             "Show All Tables",
             "Run Querry",
             "Show Game By ID",
-            "Plot Avg. Play Time Vs. Square Number",
+            "Plot DB Avg. Play Time Vs. Square Number",
+            "Plot DB Frequency of Cards Used",
             "Exit"
         ]
     
@@ -22,7 +23,7 @@ def main_menu(cnx):
     
     def print_menu():
         for index, item in enumerate(menu_items):
-            string = " "*(width//8) + f"{index + 1})  {item}"
+            string = " "*(width//12) + f"{index + 1})  {item}"
             print(f"{string:{width}}")
 
     while(True):
@@ -52,9 +53,11 @@ def main_menu(cnx):
         
         os.system("cls" if os.name == "nt" else "clear")
         
+        # OPTION 1
         if user_option == 1:
             print_querry(cnx, "SHOW TABLES;")
         
+        # OPTION 2
         elif user_option == 2:
             querry = input("Enter a querry: ")
             if querry:
@@ -67,6 +70,7 @@ def main_menu(cnx):
                 time.sleep(1)
                 continue
         
+        # OPTION 3
         elif user_option == 3:
             game_id = input("Enter a game id: ")
 
@@ -100,12 +104,13 @@ def main_menu(cnx):
             if not print_querry(cnx, event_querry):
                 continue
         
+        # OPTION 4
         elif user_option == 4:
             querry = """
             SELECT play_time, cards_used, inputs
             FROM PlayerEvents JOIN CardDiff
             ON PlayerEvents.card_diff_id=CardDiff.card_diff_id
-            WHERE is_swap=0
+            WHERE is_swap=0 AND PlayerEvents.player_num=1
             """
             table = print_querry(cnx, querry)
 
@@ -114,10 +119,10 @@ def main_menu(cnx):
             else:
                 continue
 
-            # Flip the rows and collumns
+            # Store axis data
             axis_data = {}
             
-            # Calculate space number and total time to play
+            # Calculate space number and total time to play per number
             for data in result:
                 cards = data[1].split(" ")
                 if data[2]:
@@ -145,6 +150,41 @@ def main_menu(cnx):
             plt.bar(list(axis_data.keys()), list(axis_data.values()), width=0.5, color='blue')
             plt.xlabel("Board Number")
             plt.ylabel("Average Play Time (seconds)")
+            plt.show()
+
+        # OPTION 5
+        elif user_option == 5:
+            querry = """
+            SELECT cards_used
+            FROM CardDiff
+            WHERE player_num=1
+            """
+            table = print_querry(cnx, querry)
+
+            if table:
+                headers, result = table
+            else:
+                continue
+            
+            # Store axis data
+            axis_data = {}
+
+            for data in result:
+                cards = data[0].split(" ")
+                for card in cards:
+                    if card in axis_data:
+                        axis_data[card] += 1
+                    else:
+                        axis_data[card] = 1
+            
+            # Plot the data
+            plt.barh(list(axis_data.keys()), list(axis_data.values()), 0.5, color='blue')
+            
+            for index, value in enumerate(list(axis_data.values())):
+                plt.text(value + 0.1, index - 0.15, str(value), color='blue', fontweight='bold')
+            
+            plt.xlabel("Frequency")
+            plt.ylabel("Card Value")
             plt.show()
         
         print("\n")
