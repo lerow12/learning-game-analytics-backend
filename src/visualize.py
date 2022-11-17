@@ -2,8 +2,8 @@ import mysql.connector
 from mysql.connector import errorcode
 import argparse
 import matplotlib.pyplot as plt
-from menu_mode import main_menu
-from sql_helper import print_querry
+from visualize_utilities.menu_mode import main_menu
+from visualize_utilities.sql_helper import print_querry
 
 
 # Temp Creds

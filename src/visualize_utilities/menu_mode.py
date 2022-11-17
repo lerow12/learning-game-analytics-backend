@@ -1,6 +1,6 @@
 import time
 import os
-from sql_helper import print_querry
+from visualize_utilities.sql_helper import print_querry
 import matplotlib.pyplot as plt
 
 
