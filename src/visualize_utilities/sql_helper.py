@@ -34,7 +34,7 @@ def print_query(cnx, query):
         db_cursor.execute(query)
     except:
         os.system("cls" if os.name == "nt" else "clear")
-        print("Invalid query")
+        print("Invalid Query")
         time.sleep(1)
         return None
 
