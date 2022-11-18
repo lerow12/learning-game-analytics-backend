@@ -70,9 +70,9 @@ event_types = {
 
 
 def value_convert(value):
-    if (value == "Prime"):
+    if (value == "Prime" or value == "prime"):
         return 'P'
-    elif (value == "Wild"):
+    elif (value == "Wild" or value == "wild"):
         return 'W'
     else:
         return value
