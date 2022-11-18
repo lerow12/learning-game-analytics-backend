@@ -62,7 +62,6 @@ def show_plot(x, y, x_label, y_label, title, chart_type):
         plt.bar(x, y, width=0.5, color='blue')
     elif chart_type == "barh":
         plt.barh(x, y, 0.5, color='blue')
-            
         for index, value in enumerate(y):
             plt.text(value + 0.05, index, str(value), color='blue', fontweight='bold')
     elif chart_type == "scatter":
@@ -89,7 +88,8 @@ if __name__ == "__main__":
         except:
             char = char.strip("'")
             unit = str(char)
-        x.append(unit)
+        if unit:
+            x.append(unit)
     
     for char in sys.argv[2].strip("[]").split(","):
         char = char.strip(" ")
@@ -98,6 +98,7 @@ if __name__ == "__main__":
         except:
             char = char.strip("'")
             unit = str(char)
-        y.append(unit)
+        if unit:
+            y.append(unit)
 
     show_plot(x, y, *sys.argv[3:])
