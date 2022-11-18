@@ -9,7 +9,7 @@ import database_strings as dbs
 from create_database import create_database
 
 
-# Temp Creds
+# LOGIN CREDS NEED TO BE CHANGED TO YOUR DB
 database_name = "NyingiDatabase"
 host = "localhost"
 user = "test"
@@ -41,6 +41,7 @@ try:
 except mysql.connector.Error as err:
     if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
         print("Something is wrong with your user name or password")
+        exit()
     elif err.errno == errorcode.ER_BAD_DB_ERROR:
         width = 55
         print("+" + "-"*(width - 2) + "+")
@@ -57,11 +58,18 @@ except mysql.connector.Error as err:
                 dbs.Create_CardDif,
                 dbs.Create_GameTable,
                 dbs.Create_Player_Events]
-        create_database(host, user, password, database_name, nyingi_query_list)
-        print("Success!")
+        try:
+            create_database(host, user, password, database_name, nyingi_query_list)
+            cnx = mysql.connector.connect(
+                host=host,
+                user=user,
+                password=password,
+                database=database_name)
+        except:
+            print("ERROR: Failed to create DB")
     else:
         print(err)
-    exit()
+        exit()
 
 
 # Attempt to run SQL query

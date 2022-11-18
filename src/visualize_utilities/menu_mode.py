@@ -301,7 +301,10 @@ def main_menu(cnx):
             password = gp.getpass(prompt = "Enter password: ")
 
             cnx.close()
-            delete_database(host, user, password, database_name)
+            try:
+                delete_database(host, user, password, database_name)
+            except:
+                print("ERROR: Incorrect credentials")
             print("Exiting...")
             return
 
