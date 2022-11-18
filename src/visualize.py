@@ -2,8 +2,11 @@ import mysql.connector
 from mysql.connector import errorcode
 import argparse
 import matplotlib.pyplot as plt
+import getpass as gp
 from visualize_utilities.menu_mode import main_menu
 from visualize_utilities.sql_helper import print_query
+import database_strings as dbs
+from create_database import create_database
 
 
 # Temp Creds
@@ -39,7 +42,23 @@ except mysql.connector.Error as err:
     if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
         print("Something is wrong with your user name or password")
     elif err.errno == errorcode.ER_BAD_DB_ERROR:
-        print("Database does not exist")
+        width = 55
+        print("+" + "-"*(width - 2) + "+")
+        print(f"|{'Create New Database':^{width - 2}}|")
+        print("+" + "-"*(width - 2) + "+")
+        
+        database_name = "NyingiDatabase"
+        host = input("Enter Host: ")
+        user = input("Enter User: ")
+        password = gp.getpass(prompt = "Enter password: ")
+
+        nyingi_query_list = [
+                dbs.Create_BoardDif,
+                dbs.Create_CardDif,
+                dbs.Create_GameTable,
+                dbs.Create_Player_Events]
+        create_database(host, user, password, database_name, nyingi_query_list)
+        print("Success!")
     else:
         print(err)
     exit()

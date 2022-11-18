@@ -1,9 +1,9 @@
 import time
 import os
-import matplotlib.pyplot as plt
 import getpass as gp
 from visualize_utilities.sql_helper import print_query
-from create_database import create_database, delete_database
+from create_database import delete_database
+import subprocess as sp
 import database_strings as dbs
 
 
@@ -18,7 +18,6 @@ def main_menu(cnx):
             "Plot DB Frequency of Cards Used",
             "Plot DB Frequency of Cards Swapped",
             "Plot DB Wins vs Difficulty",
-            "Create DB",
             "Delete DB",
             "Exit"
         ]
@@ -79,7 +78,7 @@ def main_menu(cnx):
         
         # OPTION 3
         elif user_option == 3:
-            game_id = input("Enter a game id: ")
+            game_id = input(f"Enter a game id: ")
 
             try:
                 game_id = int(game_id)
@@ -88,6 +87,30 @@ def main_menu(cnx):
                 print("Invalid Game ID")
                 time.sleep(1)
                 continue
+            
+            query = """
+            SELECT game_id
+            FROM GameTable
+            GROUP BY game_id
+            """
+            table = print_query(cnx, query)
+
+            if table:
+                _, result = table
+            else:
+                continue
+
+            game_ids = set()
+            [game_ids.add(row[0]) for row in result]
+
+            if game_id not in game_ids:
+                os.system("cls" if os.name == "nt" else "clear")
+                print("Invalid Game ID")
+                time.sleep(1)
+                continue
+
+            os.system("cls" if os.name == "nt" else "clear")
+            print(f"Game_ID = {game_id}\n")
             
             game_query = f"""
             SELECT board_area, max_value, computer_difficulty, game_name, board_state, winner
@@ -154,11 +177,15 @@ def main_menu(cnx):
                 axis_data[key] = value[0] / value[1]
 
             # Plot the data
-            plt.bar(list(axis_data.keys()), list(axis_data.values()), width=0.5, color='blue')
-            plt.xlabel("Board Number")
-            plt.ylabel("Average Play Time (seconds)")
-            plt.title("Avg. Play Time Vs. Board Number")
-            plt.show()
+            plot_list = ["python3", "visualize_utilities/sql_helper.py"]
+            plot_list.append(str(list(axis_data.keys())))
+            plot_list.append(str(list(axis_data.values()))) 
+            plot_list.append("Board Number") 
+            plot_list.append("Average Play Time (seconds)")
+            plot_list.append("Avg. Play Time Vs. Board Number")
+            plot_list.append("bar")
+
+            sp.Popen(plot_list)
 
         # OPTION 5
         elif user_option == 5:
@@ -171,7 +198,7 @@ def main_menu(cnx):
             table = print_query(cnx, query)
 
             if table:
-                headers, result = table
+                _, result = table
             else:
                 continue
             
@@ -187,15 +214,15 @@ def main_menu(cnx):
                         axis_data[card] = 1
             
             # Plot the data
-            plt.barh(list(axis_data.keys()), list(axis_data.values()), 0.5, color='blue')
-            
-            for index, value in enumerate(list(axis_data.values())):
-                plt.text(value + 0.05, index, str(value), color='blue', fontweight='bold')
-            
-            plt.xlabel("Frequency")
-            plt.ylabel("Card Value")
-            plt.title("Frequency of Played Cards")
-            plt.show()
+            plot_list = ["python3", "visualize_utilities/sql_helper.py"]
+            plot_list.append(str(list(axis_data.keys())))
+            plot_list.append(str(list(axis_data.values()))) 
+            plot_list.append("Frequency") 
+            plot_list.append("Card Value")
+            plot_list.append("Frequency of Played Cards")
+            plot_list.append("barh")
+
+            sp.Popen(plot_list)
         
         # OPTION 6
         elif user_option == 6:
@@ -208,7 +235,7 @@ def main_menu(cnx):
             table = print_query(cnx, query)
 
             if table:
-                headers, result = table
+                _, result = table
             else:
                 continue
             
@@ -224,15 +251,15 @@ def main_menu(cnx):
                         axis_data[card] = 1
             
             # Plot the data
-            plt.barh(list(axis_data.keys()), list(axis_data.values()), 0.5, color='blue')
-            
-            for index, value in enumerate(list(axis_data.values())):
-                plt.text(value + 0.05, index, str(value), color='blue', fontweight='bold')
-            
-            plt.xlabel("Frequency")
-            plt.ylabel("Card Value")
-            plt.title("Frequency of Swapped Cards")
-            plt.show()
+            plot_list = ["python3", "visualize_utilities/sql_helper.py"]
+            plot_list.append(str(list(axis_data.keys())))
+            plot_list.append(str(list(axis_data.values()))) 
+            plot_list.append("Frequency") 
+            plot_list.append("Card Value")
+            plot_list.append("Frequency of Swapped Cards")
+            plot_list.append("barh")
+
+            sp.Popen(plot_list)
 
         # OPTION 7
         elif user_option == 7:
@@ -245,7 +272,7 @@ def main_menu(cnx):
             table = print_query(cnx, query)
 
             if table:
-                headers, result = table
+                _, result = table
             else:
                 continue
 
@@ -256,12 +283,16 @@ def main_menu(cnx):
                 axis_data[data[0]] = data[1]
             
             # Plot the data
-            plt.bar(list(axis_data.keys()), list(axis_data.values()), width=0.5, color='blue')
-            plt.xlabel("Computer Difficulty")
-            plt.ylabel("Player Wins")
-            plt.title("Wins Vs. Difficulty")
-            plt.show()
+            plot_list = ["python3", "visualize_utilities/sql_helper.py"]
+            plot_list.append(str(list(axis_data.keys())))
+            plot_list.append(str(list(axis_data.values()))) 
+            plot_list.append("Computer Difficulty") 
+            plot_list.append("Player Wins")
+            plot_list.append("Wins Vs. Difficulty")
+            plot_list.append("bar")
 
+            sp.Popen(plot_list)
+        
         # OPTION 8
         elif user_option == 8:
             database_name = "NyingiDatabase"
@@ -269,21 +300,10 @@ def main_menu(cnx):
             user = input("Enter User: ")
             password = gp.getpass(prompt = "Enter password: ")
 
-            nyingi_query_list = [
-                    dbs.Create_BoardDif,
-                    dbs.Create_CardDif,
-                    dbs.Create_GameTable,
-                    dbs.Create_Player_Events]
-            create_database(host, user, password, database_name, nyingi_query_list)
-        
-        # OPTION 9
-        elif user_option == 9:
-            database_name = "NyingiDatabase"
-            host = input("Enter Host: ")
-            user = input("Enter User: ")
-            password = gp.getpass(prompt = "Enter password: ")
-
+            cnx.close()
             delete_database(host, user, password, database_name)
+            print("Exiting...")
+            return
 
         
         print("\n")
